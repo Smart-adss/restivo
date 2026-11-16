@@ -3,17 +3,29 @@
 namespace App\Domain\Tenancy\Actions;
 
 use App\Models\Branch;
+use App\Support\Features\FeatureGate;
+use App\Support\Features\LimitExceeded;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 
 class CreateBranch
 {
+    public function __construct(private FeatureGate $features) {}
+
     /**
      * @param  array{name_ar: string, name_en: string, code: string, city: string, address: string, phone?: ?string}  $data
      */
     public function handle(array $data): Branch
     {
         return DB::transaction(function () use ($data): Branch {
+            $active = Branch::query()->where('is_active', true)->count();
+
+            if ($active >= 1 && ! $this->features->allows('module.multi_branch')) {
+                throw new LimitExceeded('module.multi_branch');
+            }
+
+            $this->features->assertUnderCeiling('branches.max', $active);
+
             $branch = Branch::query()->create([
                 'name_ar' => $data['name_ar'],
                 'name_en' => $data['name_en'],

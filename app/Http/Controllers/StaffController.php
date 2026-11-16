@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Identity\RoleCatalog;
+use App\Domain\Subscription\AuditLogger;
 use App\Models\Branch;
 use App\Models\Role;
 use App\Models\User;
+use App\Support\Features\FeatureGate;
+use App\Support\Features\LimitExceeded;
+use App\Support\Features\SubscriptionReadOnly;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -79,6 +83,21 @@ class StaffController extends Controller
             ]);
         }
 
+        $activeUsers = User::query()
+            ->where('tenant_id', app(TenantContext::class)->id())
+            ->where('status', 'active')
+            ->count();
+
+        try {
+            app(FeatureGate::class)->assertUnderCeiling('users.max', $activeUsers);
+        } catch (LimitExceeded) {
+            throw ValidationException::withMessages([
+                'email' => __('app.limit_reached'),
+            ]);
+        } catch (SubscriptionReadOnly) {
+            abort(403);
+        }
+
         DB::transaction(function () use ($data, $branches, $role): void {
             $user = User::query()->create([
                 'name' => $data['name'],
@@ -104,6 +123,11 @@ class StaffController extends Controller
                 ]);
             }
         });
+
+        app(AuditLogger::class)->log('staff.role_assigned', auth()->user(), null, [
+            'role_key' => $data['role_key'],
+            'email' => $data['email'],
+        ]);
 
         return redirect()->route('app.staff.index')->with('status', __('app.staff_saved'));
     }

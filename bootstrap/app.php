@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsurePlatformUser;
+use App\Http\Middleware\EnsureSubscriptionWritable;
 use App\Http\Middleware\EnsureTenantOperational;
 use App\Http\Middleware\SetCurrentTenant;
 use App\Http\Middleware\SetLocale;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'platform' => EnsurePlatformUser::class,
             'tenant.operational' => EnsureTenantOperational::class,
+            'subscription.writable' => EnsureSubscriptionWritable::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));

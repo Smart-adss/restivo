@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Domain\Tenancy\Actions\CreateBranch;
 use App\Models\Branch;
+use App\Support\Features\LimitExceeded;
+use App\Support\Features\SubscriptionReadOnly;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class BranchController extends Controller
@@ -44,7 +47,15 @@ class BranchController extends Controller
             'address' => ['required', 'string', 'max:255'],
         ]);
 
-        $branch = $createBranch->handle($data);
+        try {
+            $branch = $createBranch->handle($data);
+        } catch (LimitExceeded) {
+            throw ValidationException::withMessages([
+                'code' => __('app.limit_reached'),
+            ]);
+        } catch (SubscriptionReadOnly) {
+            abort(403);
+        }
 
         return redirect()->route('app.branches.show', $branch->public_id);
     }

@@ -13,10 +13,29 @@
                 <nav class="flex gap-1 overflow-x-auto px-3 pb-4 md:flex-col">
                     @if (auth()->user()->is_platform_user)
                         <a href="{{ route('platform.tenants.index') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.tenants') }}</a>
+                        @if (auth()->user()->hasPermission('platform.plans.manage'))
+                            <a href="{{ route('platform.plans.index') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.plans') }}</a>
+                        @endif
+                        @if (auth()->user()->hasPermission('platform.support.manage'))
+                            <a href="{{ route('platform.support.index') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.support') }}</a>
+                        @endif
+                        @if (auth()->user()->hasPermission('platform.tenants.manage'))
+                            <a href="{{ route('platform.settings.edit') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.settings') }}</a>
+                        @endif
+                        @if (auth()->user()->hasPermission('platform.audit.view'))
+                            <a href="{{ route('platform.audit.index') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.audit') }}</a>
+                        @endif
                     @else
                         <a href="{{ route('app.home') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.branches') }}</a>
                         @if (auth()->user()->hasPermission('tenant.users.manage'))
                             <a href="{{ route('app.staff.index') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.staff') }}</a>
+                        @endif
+                        @if (auth()->user()->hasPermission('tenant.settings.manage'))
+                            <a href="{{ route('app.subscription') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.subscription') }}</a>
+                        @endif
+                        <a href="{{ route('app.support.index') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.support') }}</a>
+                        @if (app(\App\Support\Features\FeatureGate::class)->allows('module.pos'))
+                            <a href="{{ route('app.pos') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.pos') }}</a>
                         @endif
                         <a href="{{ route('app.profile') }}" class="min-h-11 rounded-md px-3 py-2 text-sm hover:bg-canvas">{{ __('app.profile') }}</a>
                     @endif
@@ -34,6 +53,14 @@
                     </div>
                 </header>
                 <main class="px-4 py-8">
+                    @unless (auth()->user()->is_platform_user)
+                        @php($subscriptionStatus = auth()->user()->tenant?->subscription?->status)
+                        @if (in_array($subscriptionStatus, ['past_due', 'grace', 'expired', 'suspended'], true))
+                            <p class="mb-4 rounded-md border px-4 py-3 text-sm {{ $subscriptionStatus === 'grace' ? 'border-danger text-danger' : 'border-line bg-white' }}">
+                                {{ __('app.subscription_status_'.$subscriptionStatus) }}
+                            </p>
+                        @endif
+                    @endunless
                     @if (session('status'))
                         <p class="mb-4 rounded-md border border-line bg-white px-4 py-3 text-sm">{{ session('status') }}</p>
                     @endif

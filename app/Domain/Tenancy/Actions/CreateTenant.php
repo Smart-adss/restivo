@@ -3,6 +3,7 @@
 namespace App\Domain\Tenancy\Actions;
 
 use App\Domain\Identity\Actions\CopySystemRoles;
+use App\Domain\Subscription\StartSubscription;
 use App\Models\Branch;
 use App\Models\Currency;
 use App\Models\Role;
@@ -18,6 +19,7 @@ class CreateTenant
     public function __construct(
         private CopySystemRoles $copySystemRoles,
         private CreateBranch $createBranch,
+        private StartSubscription $startSubscription,
     ) {}
 
     /**
@@ -47,6 +49,12 @@ class CreateTenant
             app(TenantContext::class)->set($tenant->id);
             $this->copySystemRoles->copyTo($tenant);
             $this->storeDefaultSettings($tenant->id);
+            $this->startSubscription->handle(
+                $tenant,
+                $data['plan_code'] ?? 'starter',
+                $data['interval'] ?? 'monthly',
+                filter_var($data['start_trial'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            );
 
             $branch = $this->createBranch->handle([
                 'name_ar' => $data['branch_name_ar'],

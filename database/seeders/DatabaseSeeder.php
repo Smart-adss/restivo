@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AccessCatalogSeeder::class,
+            PlanCatalogSeeder::class,
             PlatformAdminSeeder::class,
         ]);
     }

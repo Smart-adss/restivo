@@ -81,7 +81,10 @@ class TenancyIsolationTest extends TestCase
     public function test_platform_admin_creates_a_tenant_and_a_cashier_only_sees_assigned_branches(): void
     {
         $admin = User::query()->where('email', 'admin@example.com')->first();
-        $response = $this->actingAs($admin)->post(route('platform.tenants.store'), $this->payload('alpha'));
+        $response = $this->actingAs($admin)->post(route('platform.tenants.store'), $this->payload('alpha') + [
+            'plan_code' => 'pro',
+            'interval' => 'monthly',
+        ]);
         $response->assertRedirect();
         $password = session('temporary_password');
         $this->assertNotEmpty($password);
@@ -126,7 +129,7 @@ class TenancyIsolationTest extends TestCase
 
     public function test_a_request_tenant_id_cannot_move_a_branch_to_another_tenant(): void
     {
-        $alpha = app(CreateTenant::class)->handle($this->payload('alpha'));
+        $alpha = app(CreateTenant::class)->handle($this->payload('alpha') + ['plan_code' => 'pro']);
         $beta = app(CreateTenant::class)->handle($this->payload('beta'));
 
         $this->actingAs($alpha['owner'])->post(route('app.branches.store'), [

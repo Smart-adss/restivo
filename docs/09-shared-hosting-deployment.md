@@ -198,11 +198,20 @@ cd /home/{account}/restaurant-saas && /usr/local/bin/php artisan queue:work data
 
 ## 9. المجدول
 
-سطر Cron الوحيد:
+سطر Cron الوحيد على cPanel:
 
 ```text
 * * * * * cd /home/{account}/restaurant-saas && /usr/local/bin/php artisan schedule:run >> /home/{account}/logs/schedule.log 2>&1
 ```
+
+تجربة Windows المحلية ليست Cron. من PowerShell داخل مجلد التطبيق:
+
+```text
+php artisan billing:issue-invoices
+php artisan billing:advance-states
+```
+
+Task Scheduler في Windows يستطيع استدعاء `php artisan schedule:run` كل دقيقة للتجربة فقط. الإنتاج يبقى سطر cPanel، لأن الاستضافة المشتركة لا تشغّل عملية دائمة. تشغيل أمر الفاتورة مرتين يكتب فاتورة واحدة بسبب القيد الفريد `(subscription_id, period_start)`.
 
 المهام داخل التطبيق، كلها `withoutOverlapping` و`onOneServer` غير مستخدم لأنه لا يوجد قفل Redis. `withoutOverlapping` بقفل ملف مقبول على خادم واحد.
 
