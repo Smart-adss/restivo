@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsurePlatformUser;
+use App\Http\Middleware\EnsureTenantOperational;
+use App\Http\Middleware\SetCurrentTenant;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,10 +17,20 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             SetLocale::class,
+            SetCurrentTenant::class,
+        ]);
+
+        $middleware->alias([
+            'platform' => EnsurePlatformUser::class,
+            'tenant.operational' => EnsureTenantOperational::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));
-        $middleware->redirectUsersTo(fn () => route('app.home'));
+        $middleware->redirectUsersTo(function () {
+            $user = auth()->user();
+
+            return route($user?->is_platform_user ? 'platform.tenants.index' : 'app.home');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

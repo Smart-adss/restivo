@@ -106,13 +106,13 @@ class LoginTest extends TestCase
         $this->get(route('app.home'))->assertRedirect(route('login'));
     }
 
-    public function test_authenticated_user_sees_the_empty_shell(): void
+    public function test_a_user_without_a_tenant_cannot_open_operations(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user)
             ->get(route('app.home'))
-            ->assertOk()
-            ->assertSee('لا توجد بيانات تشغيل بعد');
+            ->assertForbidden()
+            ->assertSee('التشغيل غير متاح');
     }
 }

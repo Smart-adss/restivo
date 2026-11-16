@@ -2,6 +2,7 @@
 
 namespace App\Domain\Identity\Livewire;
 
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -63,6 +64,21 @@ class Login extends Component
         }
 
         RateLimiter::clear($key);
+
+        if ($user->tenant_id) {
+            $tenant = Tenant::query()->find($user->tenant_id);
+
+            if (! $tenant || $tenant->status !== 'active') {
+                Auth::logout();
+                session()->invalidate();
+                session()->regenerateToken();
+
+                throw ValidationException::withMessages([
+                    'email' => __('auth.suspended'),
+                ]);
+            }
+        }
+
         session()->regenerate();
         $requestLocale = session('locale');
         session(['locale' => $user->locale ?: 'ar']);
@@ -73,7 +89,11 @@ class Login extends Component
 
         $user->forceFill(['last_login_at' => now()])->save();
 
-        $this->redirect(route('app.home'), navigate: false);
+        $destination = $user->is_platform_user
+            ? route('platform.tenants.index')
+            : route('app.home');
+
+        $this->redirect($destination, navigate: false);
     }
 
     public function render()
