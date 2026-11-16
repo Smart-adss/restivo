@@ -3,7 +3,7 @@
 @section('content')
     <div class="flex items-center justify-between gap-4">
         <h1 class="text-2xl font-semibold">{{ __('app.staff') }}</h1>
-        <a href="{{ route('app.staff.create') }}" class="inline-flex min-h-11 items-center rounded-md bg-brand px-4 text-sm font-semibold text-brand-ink">{{ __('app.create_staff') }}</a>
+        <a href="{{ route('app.staff.create') }}" class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 text-sm font-semibold text-brand-ink">{{ __('app.create_staff') }}</a>
     </div>
     <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-white">
         @foreach ($staff as $member)

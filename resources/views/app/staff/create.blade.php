@@ -44,6 +44,6 @@
                 <p class="text-sm text-danger">{{ $message }}</p>
             @enderror
         </fieldset>
-        <button type="submit" class="flex min-h-11 items-center justify-center rounded-md bg-brand px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
+        <button type="submit" class="flex min-h-11 items-center justify-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
     </form>
 @endsection

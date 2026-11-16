@@ -4,12 +4,19 @@
         @include('layouts.partials.head')
     </head>
     <body class="min-h-screen bg-canvas font-sans text-ink antialiased">
-        <div class="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-10">
-            <div class="mb-6 flex items-center justify-between gap-4">
-                <p class="text-sm text-ink/70">{{ config('app.name') }}</p>
-                @include('layouts.partials.locale-switcher')
-            </div>
-            {{ $slot }}
+        <div class="min-h-screen md:grid md:grid-cols-2">
+            <section class="flex flex-col justify-between bg-rail px-6 py-8 text-white md:px-12 md:py-12">
+                <p class="text-4xl font-semibold tracking-tight">{{ config('app.name') }}</p>
+                <p class="mt-4 max-w-sm text-lg text-white/75">{{ __('app.login_lead') }}</p>
+            </section>
+            <section class="flex flex-col justify-center px-6 py-10 md:px-12">
+                <div class="mb-8">
+                    @include('layouts.partials.locale-switcher')
+                </div>
+                <div class="w-full max-w-md">
+                    {{ $slot }}
+                </div>
+            </section>
         </div>
         @livewireScripts
     </body>

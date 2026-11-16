@@ -19,6 +19,6 @@
             <input id="kitchen_poll_seconds" name="kitchen_poll_seconds" value="{{ old('kitchen_poll_seconds', $pollSeconds) }}" class="{{ $field }}">
         </div>
         <input type="hidden" name="maintenance_enabled" value="{{ $maintenance ? 1 : 0 }}">
-        <button class="inline-flex min-h-11 items-center rounded-md bg-brand px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
+        <button class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
     </form>
 @endsection

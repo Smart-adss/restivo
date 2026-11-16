@@ -6,7 +6,7 @@
         @csrf
         <input name="subject" required placeholder="{{ __('app.subject') }}" class="w-full rounded-md border border-line bg-white px-3 py-3">
         <textarea name="body" required class="w-full rounded-md border border-line bg-white px-3 py-3"></textarea>
-        <button class="inline-flex min-h-11 items-center rounded-md bg-brand px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
+        <button class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
     </form>
     <ul class="mt-6 max-w-xl divide-y divide-line rounded-lg border border-line bg-white">
         @foreach ($tickets as $ticket)

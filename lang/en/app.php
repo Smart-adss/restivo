@@ -3,6 +3,7 @@
 return [
     'login_title' => 'Sign in',
     'login_hint' => 'Use a staff or platform administrator account.',
+    'login_lead' => 'Branches, staff, and the subscription on one screen.',
     'email' => 'Email',
     'password' => 'Password',
     'remember' => 'Remember me on this device',

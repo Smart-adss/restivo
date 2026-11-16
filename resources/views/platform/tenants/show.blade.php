@@ -36,7 +36,7 @@
                 </select>
                 <input name="provider_ref" placeholder="{{ __('app.provider_ref') }}" class="w-full rounded-md border border-line bg-white px-3 py-3">
                 @error('provider_ref')<p class="text-sm text-danger">{{ $message }}</p>@enderror
-                <button class="inline-flex min-h-11 items-center rounded-md bg-brand px-4 text-sm font-semibold text-brand-ink">{{ __('app.record_payment') }}</button>
+                <button class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 text-sm font-semibold text-brand-ink">{{ __('app.record_payment') }}</button>
             </form>
         @endif
         @if (auth()->user()->hasPermission('platform.plans.manage'))

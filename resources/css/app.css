@@ -11,11 +11,12 @@
 
 @theme {
     --font-sans: 'IBM Plex Sans Arabic', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-    --color-canvas: #f6f4ef;
-    --color-ink: #1c1915;
-    --color-brand: #0f6e56;
-    --color-brand-ink: #ffffff;
-    --color-accent: #c46b2d;
-    --color-danger: #9f2d2d;
-    --color-line: #e4ddd2;
+    --color-canvas: #e7eeea;
+    --color-ink: #12201b;
+    --color-rail: #12201b;
+    --color-brand: #145c40;
+    --color-brand-ink: #f3faf6;
+    --color-accent: #f2c14e;
+    --color-danger: #9d2340;
+    --color-line: #d5e0da;
 }

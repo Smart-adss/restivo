@@ -39,6 +39,6 @@
                 <input id="feature-{{ $key }}" name="features[{{ $key }}]" value="{{ old('features.'.$key, $current) }}" class="{{ $field }}">
             </div>
         @endforeach
-        <button class="inline-flex min-h-11 items-center rounded-md bg-brand px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
+        <button class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
     </form>
 @endsection

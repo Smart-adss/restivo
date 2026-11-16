@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between gap-4">
         <h1 class="text-2xl font-semibold">{{ __('app.tenants') }}</h1>
         @if (auth()->user()->hasPermission('platform.tenants.manage'))
-            <a href="{{ route('platform.tenants.create') }}" class="inline-flex min-h-11 items-center rounded-md bg-brand px-4 text-sm font-semibold text-brand-ink">{{ __('app.create_tenant') }}</a>
+            <a href="{{ route('platform.tenants.create') }}" class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 text-sm font-semibold text-brand-ink">{{ __('app.create_tenant') }}</a>
         @endif
     </div>
 

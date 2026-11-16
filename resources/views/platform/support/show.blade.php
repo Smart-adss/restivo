@@ -14,6 +14,6 @@
     <form method="POST" action="{{ route('platform.support.reply', $ticket->public_id) }}" class="mt-6 max-w-xl space-y-3">
         @csrf
         <textarea name="body" required class="w-full rounded-md border border-line bg-white px-3 py-3"></textarea>
-        <button class="inline-flex min-h-11 items-center rounded-md bg-brand px-4 font-semibold text-brand-ink">{{ __('app.reply') }}</button>
+        <button class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.reply') }}</button>
     </form>
 @endsection

@@ -18,7 +18,7 @@ class PlanCatalogSeeder extends Seeder
     {
         foreach ([
             'billing.grace_days' => 7,
-            'platform.name' => 'Restaurant SaaS Platform',
+            'platform.name' => 'Restivo',
             'maintenance.enabled' => false,
             'kitchen.poll_seconds' => 10,
         ] as $key => $value) {
