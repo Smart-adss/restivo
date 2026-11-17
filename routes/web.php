@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/tenants/{tenant:public_id}/activate', [TenantController::class, 'activate'])->name('tenants.activate');
         Route::post('/tenants/{tenant:public_id}/payments', [BillingController::class, 'pay'])->name('tenants.payments.store');
         Route::post('/tenants/{tenant:public_id}/plan', [BillingController::class, 'changePlan'])->name('tenants.plan.update');
+        Route::post('/tenants/{tenant:public_id}/addons', [BillingController::class, 'updateAddon'])->name('tenants.addons.update');
     });
 
     Route::middleware('tenant.operational')->prefix('app')->group(function () {
@@ -125,6 +126,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/day', [DayReportController::class, 'show'])->name('app.reports.day');
         Route::get('/reports/tax', [FinanceReportController::class, 'tax'])->name('app.reports.tax');
         Route::get('/reports/shifts', [FinanceReportController::class, 'shifts'])->name('app.reports.shifts');
+        Route::get('/reports/profit', [FinanceReportController::class, 'profit'])->name('app.reports.profit');
+        Route::get('/reports/branches', [FinanceReportController::class, 'branches'])->name('app.reports.branches');
         Route::get('/reports/export/orders', [FinanceReportController::class, 'exportOrders'])->name('app.reports.export.orders');
         Route::get('/reports/export/expenses', [FinanceReportController::class, 'exportExpenses'])->name('app.reports.export.expenses');
 

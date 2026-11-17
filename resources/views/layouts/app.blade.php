@@ -73,6 +73,12 @@
                         @endif
                         @if (auth()->user()->hasPermission('finance.reports.advanced'))
                             <a href="{{ route('app.reports.tax') }}" class="{{ $navClass(request()->routeIs('app.reports.tax')) }}">{{ __('app.tax_report') }}</a>
+                            @if (app(\App\Support\Features\FeatureGate::class)->allows('module.advanced_reports'))
+                                <a href="{{ route('app.reports.profit') }}" class="{{ $navClass(request()->routeIs('app.reports.profit')) }}">{{ __('app.profit_report') }}</a>
+                            @endif
+                            @if (app(\App\Support\Features\FeatureGate::class)->allows('module.advanced_reports') && app(\App\Support\Features\FeatureGate::class)->allows('module.multi_branch'))
+                                <a href="{{ route('app.reports.branches') }}" class="{{ $navClass(request()->routeIs('app.reports.branches')) }}">{{ __('app.branch_comparison') }}</a>
+                            @endif
                         @endif
                         @if (auth()->user()->hasPermission('finance.expenses.manage'))
                             <a href="{{ route('app.expenses.index') }}" class="{{ $navClass(request()->routeIs('app.expenses.*')) }}">{{ __('app.expenses') }}</a>

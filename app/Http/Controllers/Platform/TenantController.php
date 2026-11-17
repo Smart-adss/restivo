@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Platform;
 use App\Domain\Subscription\AuditLogger;
 use App\Domain\Tenancy\Actions\CreateTenant;
 use App\Http\Controllers\Controller;
+use App\Models\Addon;
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Support\Features\FeatureGate;
 use App\Support\Tenancy\TenantContext;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -67,10 +70,25 @@ class TenantController extends Controller
         app(TenantContext::class)->set($tenant->id);
         $subscription = $tenant->subscription?->load('plan', 'invoices');
 
+        $addonQuantities = [];
+        if ($subscription !== null) {
+            $addonQuantities = DB::table('subscription_addons')
+                ->join('addons', 'addons.id', '=', 'subscription_addons.addon_id')
+                ->where('subscription_addons.subscription_id', $subscription->id)
+                ->pluck('subscription_addons.quantity', 'addons.key')
+                ->all();
+        }
+
+        app(FeatureGate::class)->flush();
+
         return view('platform.tenants.show', [
             'tenant' => $tenant,
             'subscription' => $subscription,
             'plans' => Plan::query()->where('is_public', true)->orderBy('sort_order')->get(),
+            'addons' => Addon::query()->where('is_active', true)->orderBy('key')->get(),
+            'addonQuantities' => $addonQuantities,
+            'effectiveBranchLimit' => app(FeatureGate::class)->limit('branches.max'),
+            'effectiveUserLimit' => app(FeatureGate::class)->limit('users.max'),
         ]);
     }
 

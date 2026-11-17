@@ -71,22 +71,32 @@ class ChangePlan
         }
 
         $branches = DB::table('branches')->where('tenant_id', $subscription->tenant_id)->where('is_active', true)->count();
-
         $users = User::query()->where('tenant_id', $subscription->tenant_id)->where('status', 'active')->count();
         $branchLimit = $values['branches.max'] ?? null;
         $userLimit = $values['users.max'] ?? null;
         $orderLimit = $values['orders.monthly'] ?? null;
 
+        $messages = [];
+
         if ($branchLimit !== null && $branches > (int) $branchLimit) {
-            throw new PlanChangeRejected;
+            $messages[] = __('app.plan_change_excess_branches', [
+                'used' => $branches,
+                'limit' => (int) $branchLimit,
+            ]);
         }
 
         if ($branches > 1 && ($values['module.multi_branch'] ?? '0') !== '1') {
-            throw new PlanChangeRejected;
+            $messages[] = __('app.plan_change_excess_branches', [
+                'used' => $branches,
+                'limit' => 1,
+            ]);
         }
 
         if ($userLimit !== null && $users > (int) $userLimit) {
-            throw new PlanChangeRejected;
+            $messages[] = __('app.plan_change_excess_users', [
+                'used' => $users,
+                'limit' => (int) $userLimit,
+            ]);
         }
 
         $used = (int) UsageCounter::query()
@@ -95,7 +105,14 @@ class ChangePlan
             ->value('used');
 
         if ($orderLimit !== null && $used > (int) $orderLimit) {
-            throw new PlanChangeRejected;
+            $messages[] = __('app.plan_change_excess_orders', [
+                'used' => $used,
+                'limit' => (int) $orderLimit,
+            ]);
+        }
+
+        if ($messages !== []) {
+            throw new PlanChangeRejected($messages);
         }
     }
 

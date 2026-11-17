@@ -50,6 +50,27 @@
                 <button class="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 text-sm">{{ __('app.change_plan') }}</button>
             </form>
             @error('plan_code')<p class="mt-2 text-sm text-danger">{{ $message }}</p>@enderror
+
+            <section class="mt-6 max-w-xl rounded-lg border border-line bg-white px-4 py-4 text-sm">
+                <h2 class="font-semibold">{{ __('app.subscription_addons') }}</h2>
+                <p class="mt-1 text-ink/70">
+                    {{ __('app.effective_branch_limit') }}: {{ $effectiveBranchLimit ?? __('app.unlimited') }}
+                    · {{ __('app.effective_user_limit') }}: {{ $effectiveUserLimit ?? __('app.unlimited') }}
+                </p>
+                @foreach ($addons as $addon)
+                    <form method="POST" action="{{ route('platform.tenants.addons.update', $tenant->public_id) }}" class="mt-3 flex flex-wrap items-end gap-2">
+                        @csrf
+                        <input type="hidden" name="addon_key" value="{{ $addon->key }}">
+                        <div class="min-w-[10rem] flex-1">
+                            <label class="mb-1 block text-xs text-ink/70">{{ $addon->name() }}</label>
+                            <input type="number" name="quantity" min="0" max="100" value="{{ $addonQuantities[$addon->key] ?? 0 }}" class="w-full rounded-md border border-line bg-white px-3 py-2">
+                        </div>
+                        <button class="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 text-sm">{{ __('app.save') }}</button>
+                    </form>
+                @endforeach
+                @error('quantity')<p class="mt-2 text-sm text-danger">{{ $message }}</p>@enderror
+                @error('addon_key')<p class="mt-2 text-sm text-danger">{{ $message }}</p>@enderror
+            </section>
         @endif
     @endif
 

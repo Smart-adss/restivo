@@ -6,8 +6,15 @@ use RuntimeException;
 
 class PlanChangeRejected extends RuntimeException
 {
-    public function __construct()
+    /**
+     * @param  list<string>  $messages
+     */
+    public function __construct(public readonly array $messages = [])
     {
-        parent::__construct('The current usage does not fit the selected plan.');
+        parent::__construct(
+            $messages === []
+                ? 'The current usage does not fit the selected plan.'
+                : implode(' ', $messages)
+        );
     }
 }
