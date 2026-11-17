@@ -35,6 +35,15 @@ class BuildDailyBranchReport
         $end = Carbon::parse($businessDate, $timezone)->endOfDay()->utc();
 
         $orders = Order::query()
+            ->select([
+                'id',
+                'subtotal',
+                'discount_total',
+                'tax_total',
+                'delivery_fee',
+                'total',
+                'status',
+            ])
             ->where('branch_id', $branch->id)
             ->whereBetween('placed_at', [$start, $end])
             ->where('status', '!=', 'cancelled')

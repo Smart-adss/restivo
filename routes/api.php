@@ -1,10 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\BillingWebhookController;
 use App\Http\Controllers\Api\PublicOrderController;
 use App\Http\Controllers\Api\PublicReservationController;
 use App\Http\Controllers\Api\PublicTableOrderController;
 use App\Http\Middleware\ResolvePublicTenant;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/v1/webhooks/billing', BillingWebhookController::class)
+    ->middleware('throttle:60,1')
+    ->name('api.webhooks.billing');
 
 Route::prefix('v1/public/{slug}')
     ->where(['slug' => '[a-z0-9-]{3,40}'])

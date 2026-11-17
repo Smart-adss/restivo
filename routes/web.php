@@ -30,6 +30,7 @@ use App\Http\Controllers\Platform\PlanController;
 use App\Http\Controllers\Platform\SettingController;
 use App\Http\Controllers\Platform\SupportTicketController as PlatformSupportController;
 use App\Http\Controllers\Platform\TenantController;
+use App\Http\Controllers\Platform\TotpController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
@@ -63,24 +64,31 @@ Route::middleware('auth')->group(function () {
     })->name('logout');
 
     Route::middleware('platform')->prefix('platform')->name('platform.')->group(function () {
-        Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
-        Route::get('/plans/{plan:code}', [PlanController::class, 'edit'])->name('plans.edit');
-        Route::put('/plans/{plan:code}', [PlanController::class, 'update'])->name('plans.update');
-        Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
-        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
-        Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
-        Route::get('/support', [PlatformSupportController::class, 'index'])->name('support.index');
-        Route::get('/support/{publicId}', [PlatformSupportController::class, 'show'])->name('support.show');
-        Route::post('/support/{publicId}', [PlatformSupportController::class, 'reply'])->name('support.reply');
-        Route::get('/tenants', [TenantController::class, 'index'])->name('tenants.index');
-        Route::get('/tenants/create', [TenantController::class, 'create'])->name('tenants.create');
-        Route::post('/tenants', [TenantController::class, 'store'])->name('tenants.store');
-        Route::get('/tenants/{tenant:public_id}', [TenantController::class, 'show'])->name('tenants.show');
-        Route::post('/tenants/{tenant:public_id}/suspend', [TenantController::class, 'suspend'])->name('tenants.suspend');
-        Route::post('/tenants/{tenant:public_id}/activate', [TenantController::class, 'activate'])->name('tenants.activate');
-        Route::post('/tenants/{tenant:public_id}/payments', [BillingController::class, 'pay'])->name('tenants.payments.store');
-        Route::post('/tenants/{tenant:public_id}/plan', [BillingController::class, 'changePlan'])->name('tenants.plan.update');
-        Route::post('/tenants/{tenant:public_id}/addons', [BillingController::class, 'updateAddon'])->name('tenants.addons.update');
+        Route::get('/totp/setup', [TotpController::class, 'setup'])->name('totp.setup');
+        Route::post('/totp/setup', [TotpController::class, 'confirmSetup'])->name('totp.setup.confirm');
+        Route::get('/totp/challenge', [TotpController::class, 'challenge'])->name('totp.challenge');
+        Route::post('/totp/challenge', [TotpController::class, 'verify'])->name('totp.verify');
+
+        Route::middleware('platform.totp')->group(function () {
+            Route::get('/plans', [PlanController::class, 'index'])->name('plans.index');
+            Route::get('/plans/{plan:code}', [PlanController::class, 'edit'])->name('plans.edit');
+            Route::put('/plans/{plan:code}', [PlanController::class, 'update'])->name('plans.update');
+            Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
+            Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+            Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
+            Route::get('/support', [PlatformSupportController::class, 'index'])->name('support.index');
+            Route::get('/support/{publicId}', [PlatformSupportController::class, 'show'])->name('support.show');
+            Route::post('/support/{publicId}', [PlatformSupportController::class, 'reply'])->name('support.reply');
+            Route::get('/tenants', [TenantController::class, 'index'])->name('tenants.index');
+            Route::get('/tenants/create', [TenantController::class, 'create'])->name('tenants.create');
+            Route::post('/tenants', [TenantController::class, 'store'])->name('tenants.store');
+            Route::get('/tenants/{tenant:public_id}', [TenantController::class, 'show'])->name('tenants.show');
+            Route::post('/tenants/{tenant:public_id}/suspend', [TenantController::class, 'suspend'])->name('tenants.suspend');
+            Route::post('/tenants/{tenant:public_id}/activate', [TenantController::class, 'activate'])->name('tenants.activate');
+            Route::post('/tenants/{tenant:public_id}/payments', [BillingController::class, 'pay'])->name('tenants.payments.store');
+            Route::post('/tenants/{tenant:public_id}/plan', [BillingController::class, 'changePlan'])->name('tenants.plan.update');
+            Route::post('/tenants/{tenant:public_id}/addons', [BillingController::class, 'updateAddon'])->name('tenants.addons.update');
+        });
     });
 
     Route::middleware('tenant.operational')->prefix('app')->group(function () {

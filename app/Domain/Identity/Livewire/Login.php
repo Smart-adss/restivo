@@ -89,9 +89,14 @@ class Login extends Component
 
         $user->forceFill(['last_login_at' => now()])->save();
 
-        $destination = $user->is_platform_user
-            ? route('platform.tenants.index')
-            : route('app.home');
+        if ($user->is_platform_user) {
+            session()->forget('platform_totp_ok');
+            $destination = $user->totp_confirmed_at
+                ? route('platform.totp.challenge')
+                : route('platform.totp.setup');
+        } else {
+            $destination = route('app.home');
+        }
 
         $this->redirect($destination, navigate: false);
     }
