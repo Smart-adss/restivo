@@ -68,7 +68,14 @@
                             <a href="{{ route('app.kitchen.index') }}" class="{{ $navClass(request()->routeIs('app.kitchen.*')) }}">{{ __('app.kitchen') }}</a>
                         @endif
                         @if (auth()->user()->hasPermission('finance.reports.view'))
-                            <a href="{{ route('app.reports.day') }}" class="{{ $navClass(request()->routeIs('app.reports.*')) }}">{{ __('app.day_report') }}</a>
+                            <a href="{{ route('app.reports.day') }}" class="{{ $navClass(request()->routeIs('app.reports.day')) }}">{{ __('app.day_report') }}</a>
+                            <a href="{{ route('app.reports.shifts') }}" class="{{ $navClass(request()->routeIs('app.reports.shifts')) }}">{{ __('app.shift_cash_report') }}</a>
+                        @endif
+                        @if (auth()->user()->hasPermission('finance.reports.advanced'))
+                            <a href="{{ route('app.reports.tax') }}" class="{{ $navClass(request()->routeIs('app.reports.tax')) }}">{{ __('app.tax_report') }}</a>
+                        @endif
+                        @if (auth()->user()->hasPermission('finance.expenses.manage'))
+                            <a href="{{ route('app.expenses.index') }}" class="{{ $navClass(request()->routeIs('app.expenses.*')) }}">{{ __('app.expenses') }}</a>
                         @endif
                         @if (app(\App\Support\Features\FeatureGate::class)->allows('module.inventory') && (auth()->user()->hasPermission('inventory.items.manage') || auth()->user()->hasPermission('inventory.movements.adjust')))
                             <a href="{{ route('app.inventory.index') }}" class="{{ $navClass(request()->routeIs('app.inventory.*')) }}">{{ __('app.inventory') }}</a>

@@ -36,4 +36,10 @@
     @if ($stored)
         <p class="mt-6 text-sm text-ink/70">{{ __('app.summary_calculated_at') }}: {{ $stored->calculated_at }}</p>
     @endif
+
+    <div class="mt-8 flex flex-wrap gap-3 text-sm">
+        <a href="{{ route('app.reports.tax', ['branch_id' => $branch->id, 'from' => $date, 'to' => $date]) }}" class="text-brand hover:underline">{{ __('app.tax_report') }}</a>
+        <a href="{{ route('app.reports.shifts', ['branch_id' => $branch->id]) }}" class="text-brand hover:underline">{{ __('app.shift_cash_report') }}</a>
+        <a href="{{ route('app.reports.export.orders', ['branch_id' => $branch->id, 'from' => $date, 'to' => $date]) }}" class="text-brand hover:underline">{{ __('app.export_orders_csv') }}</a>
+    </div>
 @endsection
