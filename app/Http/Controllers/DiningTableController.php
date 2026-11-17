@@ -6,6 +6,7 @@ use App\Models\DiningTable;
 use App\Support\Features\FeatureGate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class DiningTableController extends Controller
 {
@@ -26,6 +27,12 @@ class DiningTableController extends Controller
 
         $branchIds = auth()->user()->visibleBranches()->pluck('id');
         abort_unless($branchIds->contains((int) $data['branch_id']), 403);
+
+        if (DiningTable::query()->where('branch_id', $data['branch_id'])->where('name', $data['name'])->exists()) {
+            throw ValidationException::withMessages([
+                'name' => __('app.dining_table_name_taken'),
+            ]);
+        }
 
         DiningTable::query()->create([
             'branch_id' => $data['branch_id'],

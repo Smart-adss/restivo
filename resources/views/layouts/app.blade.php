@@ -61,6 +61,9 @@
                         @if (app(\App\Support\Features\FeatureGate::class)->allows('module.pos'))
                             <a href="{{ route('app.pos') }}" class="{{ $navClass(request()->routeIs('app.pos')) }}">{{ __('app.pos') }}</a>
                         @endif
+                        @if (auth()->user()->hasPermission('tables.sessions.manage') || auth()->user()->hasPermission('tables.layout.manage'))
+                            <a href="{{ route('app.tables.index') }}" class="{{ $navClass(request()->routeIs('app.tables.*')) }}">{{ __('app.floor') }}</a>
+                        @endif
                         <a href="{{ route('app.profile') }}" class="{{ $navClass(request()->routeIs('app.profile')) }}">{{ __('app.profile') }}</a>
                     @endif
                 </nav>

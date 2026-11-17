@@ -15,6 +15,7 @@ use App\Models\OrderItemOption;
 use App\Models\OrderStatusHistory;
 use App\Models\Product;
 use App\Models\ProductOption;
+use App\Models\TableSession;
 use App\Models\Tenant;
 use App\Support\Features\FeatureGate;
 use App\Support\Features\Usage;
@@ -47,6 +48,7 @@ class CreateOrder
      *   notes?: ?string,
      *   coupon_code?: ?string,
      *   cashier_shift_id?: ?int,
+     *   table_session_id?: ?int,
      *   status?: string,
      *   items: list<array{
      *     product_id: int,
@@ -198,6 +200,11 @@ class CreateOrder
                 }
 
                 $status = $data['status'] ?? 'placed';
+                $tableSessionId = $this->resolveTableSessionId(
+                    $data['table_session_id'] ?? null,
+                    $branch->id,
+                    $data['type'],
+                );
 
                 $order = Order::query()->create([
                     'branch_id' => $branch->id,
@@ -206,6 +213,7 @@ class CreateOrder
                     'source' => $data['source'],
                     'status' => $status,
                     'cashier_shift_id' => $data['cashier_shift_id'] ?? null,
+                    'table_session_id' => $tableSessionId,
                     'customer_id' => $customerId,
                     'customer_name' => $customerName,
                     'customer_phone' => $customerPhone,
@@ -280,6 +288,14 @@ class CreateOrder
                     'created_at' => $placedAt,
                 ]);
 
+                if ($tableSessionId !== null) {
+                    DB::table('table_session_orders')->insert([
+                        'tenant_id' => $order->tenant_id,
+                        'table_session_id' => $tableSessionId,
+                        'order_id' => $order->id,
+                    ]);
+                }
+
                 return $order->load(['items.options', 'discounts']);
             });
         } catch (QueryException $exception) {
@@ -312,6 +328,33 @@ class CreateOrder
         if (! $this->features->allows($module)) {
             abort(404);
         }
+    }
+
+    private function resolveTableSessionId(mixed $sessionId, int $branchId, string $type): ?int
+    {
+        if ($sessionId === null || $sessionId === '') {
+            return null;
+        }
+
+        $session = TableSession::query()
+            ->whereKey((int) $sessionId)
+            ->where('status', 'open')
+            ->with('table')
+            ->first();
+
+        if ($session === null || $session->table === null || (int) $session->table->branch_id !== $branchId) {
+            throw ValidationException::withMessages([
+                'table_session_id' => __('app.table_session_unavailable'),
+            ]);
+        }
+
+        if ($type !== 'dine_in') {
+            throw ValidationException::withMessages([
+                'type' => __('app.table_session_requires_dine_in'),
+            ]);
+        }
+
+        return $session->id;
     }
 
     /**

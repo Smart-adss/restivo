@@ -96,5 +96,20 @@ class Order extends Model
     {
         return $this->belongsTo(CashierShift::class, 'cashier_shift_id');
     }
+
+    public function tableSession(): BelongsTo
+    {
+        return $this->belongsTo(TableSession::class, 'table_session_id');
+    }
+
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
+    public function billSplits(): HasMany
+    {
+        return $this->hasMany(BillSplit::class);
+    }
 }
 

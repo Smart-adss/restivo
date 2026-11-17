@@ -14,7 +14,9 @@ use App\Http\Controllers\OrderBoardController;
 use App\Http\Controllers\PublicMenuController;
 use App\Http\Controllers\PublicOrderPageController;
 use App\Http\Controllers\PublicReservationPageController;
+use App\Http\Controllers\PublicTablePageController;
 use App\Http\Controllers\ReservationBoardController;
+use App\Http\Controllers\TablesBoardController;
 use App\Http\Controllers\Platform\BillingController;
 use App\Http\Controllers\Platform\PlanController;
 use App\Http\Controllers\Platform\SettingController;
@@ -95,6 +97,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/pos/shifts/{publicId}/movements', [PosController::class, 'movement'])->middleware('subscription.writable')->name('app.pos.movements.store');
         Route::post('/pos/sales', [PosController::class, 'sale'])->middleware('subscription.writable')->name('app.pos.sales.store');
         Route::get('/pos/receipts/{publicId}', [PosController::class, 'receipt'])->name('app.pos.receipt');
+        Route::post('/pos/orders/{publicId}/refunds', [PosController::class, 'refund'])->middleware('subscription.writable')->name('app.pos.refunds.store');
+        Route::post('/orders/{publicId}/manual-discount', [PosController::class, 'manualDiscount'])->middleware('subscription.writable')->name('app.orders.manual-discount');
+
+        Route::get('/tables', [TablesBoardController::class, 'index'])->name('app.tables.index');
+        Route::post('/tables/areas', [TablesBoardController::class, 'storeArea'])->middleware('subscription.writable')->name('app.tables.areas.store');
+        Route::post('/tables/tables', [TablesBoardController::class, 'storeTable'])->middleware('subscription.writable')->name('app.tables.tables.store');
+        Route::post('/tables/{publicId}/sessions', [TablesBoardController::class, 'openSession'])->middleware('subscription.writable')->name('app.tables.sessions.open');
+        Route::post('/table-sessions/{publicId}/close', [TablesBoardController::class, 'closeSession'])->middleware('subscription.writable')->name('app.tables.sessions.close');
+        Route::post('/table-sessions/{publicId}/transfer', [TablesBoardController::class, 'transfer'])->middleware('subscription.writable')->name('app.tables.sessions.transfer');
+        Route::post('/orders/{publicId}/splits', [TablesBoardController::class, 'split'])->middleware('subscription.writable')->name('app.orders.splits.store');
+        Route::post('/tables/{publicId}/qr', [TablesBoardController::class, 'storeQr'])->middleware('subscription.writable')->name('app.tables.qr.store');
 
         Route::get('/orders', [OrderBoardController::class, 'index'])->name('app.orders.index');
         Route::get('/orders/poll', [OrderBoardController::class, 'poll'])->name('app.orders.poll');
@@ -137,6 +150,9 @@ Route::get('/{slug}/menu/{branchPublicId}', [PublicMenuController::class, 'show'
 Route::get('/{slug}/menu/{branchPublicId}/qr.png', [PublicMenuController::class, 'qr'])
     ->where('slug', '[a-z0-9-]{3,40}')
     ->name('public.menu.qr');
+Route::get('/{slug}/table/{tablePublicId}', [PublicTablePageController::class, 'show'])
+    ->where('slug', '[a-z0-9-]{3,40}')
+    ->name('public.table.show');
 Route::get('/{slug}/orders/{orderPublicId}', [PublicOrderPageController::class, 'track'])
     ->where('slug', '[a-z0-9-]{3,40}')
     ->name('public.orders.track');
