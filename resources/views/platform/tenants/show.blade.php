@@ -9,6 +9,28 @@
         <p class="text-sm">{{ $tenant->status === 'active' ? __('app.status_active') : __('app.status_suspended') }}</p>
     </div>
 
+    @if (auth()->user()->hasPermission('platform.tenants.manage') && $owner)
+        <section class="mt-6 max-w-xl rounded-lg border border-line bg-white px-4 py-4">
+            <h2 class="font-semibold">{{ __('app.owner_password') }}</h2>
+            <p class="mt-1 text-sm text-ink/70">{{ $owner->email }} — {{ __('app.owner_password_hint') }}</p>
+            <form method="POST" action="{{ route('platform.tenants.owner-password.update', $tenant->public_id) }}" class="mt-4 space-y-3">
+                @csrf
+                <div>
+                    <label for="password" class="mb-1 block text-sm">{{ __('app.password') }}</label>
+                    <input id="password" name="password" type="password" required autocomplete="new-password" class="w-full rounded-md border border-line bg-white px-3 py-3">
+                    @error('password')
+                        <p class="mt-1 text-sm text-danger">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="password_confirmation" class="mb-1 block text-sm">{{ __('app.password_confirmation') }}</label>
+                    <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" class="w-full rounded-md border border-line bg-white px-3 py-3">
+                </div>
+                <button type="submit" class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-brand-ink hover:bg-ink">{{ __('app.save') }}</button>
+            </form>
+        </section>
+    @endif
+
     @if (session('temporary_password'))
         <div class="mt-6 max-w-xl rounded-lg border border-accent bg-white px-4 py-4">
             <p class="text-sm font-semibold">{{ __('app.temporary_password') }}</p>

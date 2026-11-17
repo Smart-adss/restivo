@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Addon;
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Models\User;
 use App\Support\Features\FeatureGate;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
@@ -89,7 +90,37 @@ class TenantController extends Controller
             'addonQuantities' => $addonQuantities,
             'effectiveBranchLimit' => app(FeatureGate::class)->limit('branches.max'),
             'effectiveUserLimit' => app(FeatureGate::class)->limit('users.max'),
+            'owner' => $this->owner($tenant),
         ]);
+    }
+
+    public function updateOwnerPassword(Request $request, Tenant $tenant, AuditLogger $audit): RedirectResponse
+    {
+        $this->authorizeManage();
+        $owner = $this->owner($tenant);
+
+        if ($owner === null) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'password.required' => __('app.owner_password_required'),
+            'password.min' => __('app.owner_password_min'),
+            'password.confirmed' => __('app.owner_password_confirmed'),
+        ]);
+
+        $owner->password = $data['password'];
+        $owner->save();
+        DB::table('sessions')->where('user_id', $owner->id)->delete();
+
+        app(TenantContext::class)->set($tenant->id);
+        $audit->log('tenant.owner_password_reset', $owner, null, ['email' => $owner->email]);
+
+        return redirect()
+            ->route('platform.tenants.show', $tenant->public_id)
+            ->with('status', __('app.owner_password_saved'));
     }
 
     public function suspend(Tenant $tenant, AuditLogger $audit): RedirectResponse
@@ -117,5 +148,18 @@ class TenantController extends Controller
     private function authorizeManage(): void
     {
         abort_unless(auth()->user()->hasPermission('platform.tenants.manage'), 403);
+    }
+
+    private function owner(Tenant $tenant): ?User
+    {
+        return User::query()
+            ->where('tenant_id', $tenant->id)
+            ->whereIn('id', function ($query): void {
+                $query->select('user_roles.user_id')
+                    ->from('user_roles')
+                    ->join('roles', 'roles.id', '=', 'user_roles.role_id')
+                    ->where('roles.key', 'business_owner');
+            })
+            ->first();
     }
 }

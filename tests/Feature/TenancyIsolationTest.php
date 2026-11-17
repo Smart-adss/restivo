@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Domain\Identity\PermissionCatalog;
+use App\Models\AuditLog;
 use App\Domain\Tenancy\Actions\CreateBranch;
 use App\Domain\Tenancy\Actions\CreateTenant;
 use App\Models\Branch;
@@ -13,6 +14,7 @@ use App\Support\Tenancy\TenantContext;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class TenancyIsolationTest extends TestCase
@@ -185,6 +187,57 @@ class TenancyIsolationTest extends TestCase
         $this->actingAs($created['owner'])
             ->get(route('app.home'))
             ->assertForbidden();
+    }
+
+    public function test_platform_admin_can_reset_the_owner_password(): void
+    {
+        $created = app(CreateTenant::class)->handle($this->payload('alpha'));
+        $admin = User::query()->where('email', 'admin@example.com')->first();
+        $support = User::factory()->create([
+            'email' => 'support@example.com',
+            'password' => 'Password123',
+            'is_platform_user' => true,
+        ]);
+        $supportRole = Role::withoutGlobalScope('tenant')->whereNull('tenant_id')->where('key', 'platform_support')->first();
+
+        DB::table('user_roles')->insert([
+            'user_id' => $support->id,
+            'role_id' => $supportRole->id,
+            'branch_id' => null,
+        ]);
+
+        $this->actingAs($support)->post(route('platform.tenants.owner-password.update', $created['tenant']->public_id), [
+            'password' => 'NewPass123',
+            'password_confirmation' => 'NewPass123',
+        ])->assertForbidden();
+
+        $this->actingAs($admin)
+            ->from(route('platform.tenants.show', $created['tenant']->public_id))
+            ->post(route('platform.tenants.owner-password.update', $created['tenant']->public_id), [
+                'password' => 'short',
+                'password_confirmation' => 'short',
+            ])
+            ->assertSessionHasErrors('password');
+
+        $this->actingAs($admin)
+            ->post(route('platform.tenants.owner-password.update', $created['tenant']->public_id), [
+                'password' => 'NewPass123',
+                'password_confirmation' => 'NewPass123',
+            ])
+            ->assertRedirect(route('platform.tenants.show', $created['tenant']->public_id))
+            ->assertSessionHas('status', 'تم تغيير كلمة مرور المالك.');
+
+        $this->assertTrue(Hash::check('NewPass123', $created['owner']->fresh()->password));
+        $this->assertFalse(Hash::check($created['password'], $created['owner']->fresh()->password));
+
+        $encoded = json_encode(AuditLog::query()->where('action', 'tenant.owner_password_reset')->first());
+        $this->assertStringNotContainsString('NewPass123', $encoded);
+
+        $this->actingAsGuest();
+        $this->post(route('login.store'), [
+            'email' => $created['owner']->email,
+            'password' => 'NewPass123',
+        ])->assertRedirect(route('app.home'));
     }
 
     public function test_owner_can_update_profile(): void

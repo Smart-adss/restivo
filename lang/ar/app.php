@@ -548,6 +548,13 @@ return [
     'plan_change_excess_branches' => 'الفروع النشطة (:used) تتجاوز حد الخطة (:limit).',
     'plan_change_excess_users' => 'المستخدمون النشطون (:used) يتجاوزون حد الخطة (:limit).',
     'plan_change_excess_orders' => 'طلبات الشهر (:used) تتجاوز حد الخطة (:limit).',
+    'owner_password' => 'كلمة مرور المالك',
+    'owner_password_hint' => 'كلمة المرور الجديدة لحساب دخول المالك.',
+    'password_confirmation' => 'تأكيد كلمة المرور',
+    'owner_password_saved' => 'تم تغيير كلمة مرور المالك.',
+    'owner_password_required' => 'كلمة المرور مطلوبة.',
+    'owner_password_min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.',
+    'owner_password_confirmed' => 'تأكيد كلمة المرور غير مطابق.',
 ];
 
 

@@ -548,6 +548,13 @@ return [
     'plan_change_excess_branches' => 'Active branches (:used) exceed the plan limit (:limit).',
     'plan_change_excess_users' => 'Active users (:used) exceed the plan limit (:limit).',
     'plan_change_excess_orders' => 'Monthly orders (:used) exceed the plan limit (:limit).',
+    'owner_password' => 'Owner password',
+    'owner_password_hint' => 'The new password for the owner sign-in.',
+    'password_confirmation' => 'Confirm password',
+    'owner_password_saved' => 'The owner password was changed.',
+    'owner_password_required' => 'A password is required.',
+    'owner_password_min' => 'The password must be at least 8 characters.',
+    'owner_password_confirmed' => 'The password confirmation does not match.',
 ];
 
 

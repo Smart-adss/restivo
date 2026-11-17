@@ -86,7 +86,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/tenants/create', [TenantController::class, 'create'])->name('tenants.create');
             Route::post('/tenants', [TenantController::class, 'store'])->name('tenants.store');
             Route::get('/tenants/{tenant:public_id}', [TenantController::class, 'show'])->name('tenants.show');
-            Route::post('/tenants/{tenant:public_id}/suspend', [TenantController::class, 'suspend'])->name('tenants.suspend');
+            Route::post('/tenants/{tenant:public_id}/owner-password', [TenantController::class, 'updateOwnerPassword'])->name('tenants.owner-password.update');
+        Route::post('/tenants/{tenant:public_id}/suspend', [TenantController::class, 'suspend'])->name('tenants.suspend');
             Route::post('/tenants/{tenant:public_id}/activate', [TenantController::class, 'activate'])->name('tenants.activate');
             Route::post('/tenants/{tenant:public_id}/payments', [BillingController::class, 'pay'])->name('tenants.payments.store');
             Route::post('/tenants/{tenant:public_id}/plan', [BillingController::class, 'changePlan'])->name('tenants.plan.update');
