@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Finance\Actions\BuildBranchComparisonReport;
+use App\Domain\Finance\Actions\BuildEstimatedProfitReport;
 use App\Domain\Finance\Actions\BuildShiftCashReport;
 use App\Domain\Finance\Actions\BuildTaxReport;
 use App\Domain\Finance\Actions\ExportExpensesCsv;
@@ -56,6 +58,39 @@ class FinanceReportController extends Controller
             'from' => $from,
             'to' => $to,
             'rows' => $rows,
+        ]);
+    }
+
+    public function profit(Request $request, BuildEstimatedProfitReport $report, FeatureGate $features): View
+    {
+        abort_unless(auth()->user()->hasPermission('finance.reports.advanced'), 403);
+        abort_unless($features->allows('module.advanced_reports'), 404);
+
+        $branches = auth()->user()->visibleBranches()->where('is_active', true)->values();
+        $branch = $branches->firstWhere('id', (int) $request->query('branch_id')) ?? $branches->first();
+        abort_if($branch === null, 404);
+
+        $from = (string) $request->query('from', now(auth()->user()->tenant?->timezone ?: 'Africa/Cairo')->startOfMonth()->toDateString());
+        $to = (string) $request->query('to', now(auth()->user()->tenant?->timezone ?: 'Africa/Cairo')->toDateString());
+
+        return view('app.reports.profit', [
+            'branches' => $branches,
+            'branch' => $branch,
+            'from' => $from,
+            'to' => $to,
+            'report' => $report->handle($branch, $from, $to),
+        ]);
+    }
+
+    public function branches(Request $request, BuildBranchComparisonReport $report): View
+    {
+        $from = (string) $request->query('from', now(auth()->user()->tenant?->timezone ?: 'Africa/Cairo')->startOfMonth()->toDateString());
+        $to = (string) $request->query('to', now(auth()->user()->tenant?->timezone ?: 'Africa/Cairo')->toDateString());
+
+        return view('app.reports.branches', [
+            'from' => $from,
+            'to' => $to,
+            'rows' => $report->handle($from, $to),
         ]);
     }
 

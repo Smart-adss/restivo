@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Platform;
 use App\Domain\Subscription\ChangePlan;
 use App\Domain\Subscription\InvoiceIssuer;
 use App\Domain\Subscription\RecordPayment;
+use App\Domain\Subscription\UpsertSubscriptionAddon;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\SubscriptionInvoice;
@@ -57,13 +58,38 @@ class BillingController extends Controller
 
         try {
             $changePlan->handle($subscription, $plan);
-        } catch (PlanChangeRejected) {
+        } catch (PlanChangeRejected $exception) {
             throw ValidationException::withMessages([
-                'plan_code' => __('app.plan_change_rejected'),
+                'plan_code' => $exception->messages !== []
+                    ? implode(' ', $exception->messages)
+                    : __('app.plan_change_rejected'),
             ]);
         }
 
         return redirect()->route('platform.tenants.show', $tenant->public_id)->with('status', __('app.plan_changed'));
+    }
+
+    public function updateAddon(
+        Request $request,
+        Tenant $tenant,
+        UpsertSubscriptionAddon $upsertAddon,
+    ): RedirectResponse {
+        abort_unless($request->user()->hasPermission('platform.plans.manage'), 403);
+        app(TenantContext::class)->set($tenant->id);
+
+        $data = $request->validate([
+            'addon_key' => ['required', 'string', Rule::in(['addon.extra_branch', 'addon.extra_user', 'addon.whatsapp'])],
+            'quantity' => ['required', 'integer', 'min:0', 'max:100'],
+        ]);
+
+        $subscription = $tenant->subscription;
+        abort_if($subscription === null, 404);
+
+        $upsertAddon->handle($subscription, $data['addon_key'], (int) $data['quantity']);
+
+        return redirect()
+            ->route('platform.tenants.show', $tenant->public_id)
+            ->with('status', __('app.addon_updated'));
     }
 
     public function issueRenewal(Tenant $tenant, InvoiceIssuer $invoices): RedirectResponse
