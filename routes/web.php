@@ -19,6 +19,9 @@ use App\Http\Controllers\ReservationBoardController;
 use App\Http\Controllers\DayReportController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\KitchenBoardController;
+use App\Http\Controllers\PurchasingController;
+use App\Http\Controllers\StockCountController;
+use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\TablesBoardController;
 use App\Http\Controllers\Platform\BillingController;
 use App\Http\Controllers\Platform\PlanController;
@@ -126,6 +129,24 @@ Route::middleware('auth')->group(function () {
         Route::post('/inventory/movements', [InventoryController::class, 'storeMovement'])->middleware('subscription.writable')->name('app.inventory.movements.store');
         Route::post('/inventory/recalculate', [InventoryController::class, 'recalculate'])->middleware('subscription.writable')->name('app.inventory.recalculate');
         Route::post('/inventory/stockout-setting', [InventoryController::class, 'updateStockoutSetting'])->middleware('subscription.writable')->name('app.inventory.stockout-setting');
+
+        Route::get('/purchasing', [PurchasingController::class, 'index'])->name('app.purchasing.index');
+        Route::post('/purchasing/suppliers', [PurchasingController::class, 'storeSupplier'])->middleware('subscription.writable')->name('app.purchasing.suppliers.store');
+        Route::post('/purchasing/orders', [PurchasingController::class, 'storeOrder'])->middleware('subscription.writable')->name('app.purchasing.orders.store');
+        Route::get('/purchasing/orders/{publicId}', [PurchasingController::class, 'show'])->name('app.purchasing.show');
+        Route::put('/purchasing/orders/{publicId}', [PurchasingController::class, 'updateOrder'])->middleware('subscription.writable')->name('app.purchasing.update');
+        Route::post('/purchasing/orders/{publicId}/receive', [PurchasingController::class, 'receive'])->middleware('subscription.writable')->name('app.purchasing.receive');
+
+        Route::get('/stock-counts', [StockCountController::class, 'index'])->name('app.stock-counts.index');
+        Route::post('/stock-counts', [StockCountController::class, 'store'])->middleware('subscription.writable')->name('app.stock-counts.store');
+        Route::get('/stock-counts/{publicId}', [StockCountController::class, 'show'])->name('app.stock-counts.show');
+        Route::post('/stock-counts/{publicId}/post', [StockCountController::class, 'post'])->middleware('subscription.writable')->name('app.stock-counts.post');
+
+        Route::get('/stock-transfers', [StockTransferController::class, 'index'])->name('app.stock-transfers.index');
+        Route::post('/stock-transfers', [StockTransferController::class, 'store'])->middleware('subscription.writable')->name('app.stock-transfers.store');
+        Route::get('/stock-transfers/{publicId}', [StockTransferController::class, 'show'])->name('app.stock-transfers.show');
+        Route::post('/stock-transfers/{publicId}/send', [StockTransferController::class, 'send'])->middleware('subscription.writable')->name('app.stock-transfers.send');
+        Route::post('/stock-transfers/{publicId}/receive', [StockTransferController::class, 'receive'])->middleware('subscription.writable')->name('app.stock-transfers.receive');
 
         Route::get('/orders', [OrderBoardController::class, 'index'])->name('app.orders.index');
         Route::get('/orders/poll', [OrderBoardController::class, 'poll'])->name('app.orders.poll');

@@ -73,6 +73,15 @@
                         @if (app(\App\Support\Features\FeatureGate::class)->allows('module.inventory') && (auth()->user()->hasPermission('inventory.items.manage') || auth()->user()->hasPermission('inventory.movements.adjust')))
                             <a href="{{ route('app.inventory.index') }}" class="{{ $navClass(request()->routeIs('app.inventory.*')) }}">{{ __('app.inventory') }}</a>
                         @endif
+                        @if (app(\App\Support\Features\FeatureGate::class)->allows('module.inventory') && auth()->user()->hasPermission('purchasing.orders.manage'))
+                            <a href="{{ route('app.purchasing.index') }}" class="{{ $navClass(request()->routeIs('app.purchasing.*')) }}">{{ __('app.purchasing') }}</a>
+                        @endif
+                        @if (app(\App\Support\Features\FeatureGate::class)->allows('module.inventory') && auth()->user()->hasPermission('inventory.counts.manage'))
+                            <a href="{{ route('app.stock-counts.index') }}" class="{{ $navClass(request()->routeIs('app.stock-counts.*')) }}">{{ __('app.stock_counts') }}</a>
+                        @endif
+                        @if (app(\App\Support\Features\FeatureGate::class)->allows('module.inventory') && auth()->user()->hasPermission('inventory.movements.adjust'))
+                            <a href="{{ route('app.stock-transfers.index') }}" class="{{ $navClass(request()->routeIs('app.stock-transfers.*')) }}">{{ __('app.stock_transfers') }}</a>
+                        @endif
                         <a href="{{ route('app.profile') }}" class="{{ $navClass(request()->routeIs('app.profile')) }}">{{ __('app.profile') }}</a>
                     @endif
                 </nav>
