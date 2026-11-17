@@ -90,6 +90,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/support', [SupportTicketController::class, 'store'])->name('app.support.store');
         Route::get('/pos', [PosController::class, 'show'])->name('app.pos');
         Route::post('/pos', [PosController::class, 'store'])->middleware('subscription.writable')->name('app.pos.store');
+        Route::post('/pos/shifts', [PosController::class, 'openShift'])->middleware('subscription.writable')->name('app.pos.shifts.open');
+        Route::post('/pos/shifts/{publicId}/close', [PosController::class, 'closeShift'])->middleware('subscription.writable')->name('app.pos.shifts.close');
+        Route::post('/pos/shifts/{publicId}/movements', [PosController::class, 'movement'])->middleware('subscription.writable')->name('app.pos.movements.store');
+        Route::post('/pos/sales', [PosController::class, 'sale'])->middleware('subscription.writable')->name('app.pos.sales.store');
+        Route::get('/pos/receipts/{publicId}', [PosController::class, 'receipt'])->name('app.pos.receipt');
 
         Route::get('/orders', [OrderBoardController::class, 'index'])->name('app.orders.index');
         Route::get('/orders/poll', [OrderBoardController::class, 'poll'])->name('app.orders.poll');
