@@ -17,6 +17,8 @@ use App\Http\Controllers\PublicReservationPageController;
 use App\Http\Controllers\PublicTablePageController;
 use App\Http\Controllers\ReservationBoardController;
 use App\Http\Controllers\DayReportController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\FinanceReportController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\KitchenBoardController;
 use App\Http\Controllers\PurchasingController;
@@ -121,6 +123,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/kitchen/tickets/{publicId}/start', [KitchenBoardController::class, 'start'])->middleware('subscription.writable')->name('app.kitchen.tickets.start');
         Route::post('/kitchen/tickets/{publicId}/ready', [KitchenBoardController::class, 'ready'])->middleware('subscription.writable')->name('app.kitchen.tickets.ready');
         Route::get('/reports/day', [DayReportController::class, 'show'])->name('app.reports.day');
+        Route::get('/reports/tax', [FinanceReportController::class, 'tax'])->name('app.reports.tax');
+        Route::get('/reports/shifts', [FinanceReportController::class, 'shifts'])->name('app.reports.shifts');
+        Route::get('/reports/export/orders', [FinanceReportController::class, 'exportOrders'])->name('app.reports.export.orders');
+        Route::get('/reports/export/expenses', [FinanceReportController::class, 'exportExpenses'])->name('app.reports.export.expenses');
+
+        Route::get('/expenses', [ExpenseController::class, 'index'])->name('app.expenses.index');
+        Route::post('/expenses/categories', [ExpenseController::class, 'storeCategory'])->middleware('subscription.writable')->name('app.expenses.categories.store');
+        Route::post('/expenses', [ExpenseController::class, 'store'])->middleware('subscription.writable')->name('app.expenses.store');
 
         Route::get('/inventory', [InventoryController::class, 'index'])->name('app.inventory.index');
         Route::post('/inventory/units', [InventoryController::class, 'storeUnit'])->middleware('subscription.writable')->name('app.inventory.units.store');
