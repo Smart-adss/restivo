@@ -27,3 +27,10 @@ curl -o /dev/null -s -w '%{time_total}\n' https://{domain}/{slug}/menu
 ## تشغيل
 
 انظر `docs/17-ops-runbook.md` و`docs/17-hosting-provider-answers.md`.
+
+## Sprint 18 — تجريب وإطلاق
+
+- سيناريو قبول المنشأة التجريبية: بيع + طلب عام + حجز + إغلاق وردية (`docs/18-pilot-runbook.md`).
+- مراقبة يومية: `php artisan ops:health-check` وشاشة `/platform/failed-jobs`.
+- تدريب المالك وتسليم كلمات المرور: `docs/18-owner-training.md`.
+- أرشيف الإصدارات خارج الجذر العام وخطة تراجع: `docs/18-rollback-plan.md`.

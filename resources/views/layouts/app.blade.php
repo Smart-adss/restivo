@@ -31,6 +31,7 @@
                         @endif
                         @if (auth()->user()->hasPermission('platform.audit.view'))
                             <a href="{{ route('platform.audit.index') }}" class="{{ $navClass(request()->routeIs('platform.audit.*')) }}">{{ __('app.audit') }}</a>
+                            <a href="{{ route('platform.failed-jobs.index') }}" class="{{ $navClass(request()->routeIs('platform.failed-jobs.*')) }}">{{ __('app.failed_jobs') }}</a>
                         @endif
                     @else
                         <a href="{{ route('app.home') }}" class="{{ $navClass(request()->routeIs('app.home', 'app.branches.*')) }}">{{ __('app.branches') }}</a>
