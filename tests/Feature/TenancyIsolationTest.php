@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Domain\Identity\Livewire\Login;
 use App\Domain\Identity\PermissionCatalog;
 use App\Domain\Tenancy\Actions\CreateBranch;
 use App\Domain\Tenancy\Actions\CreateTenant;
@@ -14,7 +13,6 @@ use App\Support\Tenancy\TenantContext;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class TenancyIsolationTest extends TestCase
@@ -172,10 +170,14 @@ class TenancyIsolationTest extends TestCase
 
         $this->assertSame('suspended', $created['tenant']->fresh()->status);
 
-        Livewire::test(Login::class)
-            ->set('email', $created['owner']->email)
-            ->set('password', $created['password'])
-            ->call('authenticate')
+        $this->actingAsGuest();
+
+        $this->followingRedirects()
+            ->from(route('login'))
+            ->post(route('login.store'), [
+                'email' => $created['owner']->email,
+                'password' => $created['password'],
+            ])
             ->assertSee('المنشأة معلقة');
 
         $this->assertGuest();

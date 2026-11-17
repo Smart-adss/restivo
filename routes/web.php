@@ -1,10 +1,10 @@
 <?php
 
-use App\Domain\Identity\Livewire\Login;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BranchHoursController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Menu\CategoryController;
 use App\Http\Controllers\Menu\ProductController;
 use App\Http\Controllers\Menu\ThemeController;
@@ -52,7 +52,8 @@ Route::get('/', function () {
 Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', Login::class)->name('login');
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 });
 
 Route::middleware('auth')->group(function () {

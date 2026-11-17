@@ -14,10 +14,9 @@
                     @include('layouts.partials.locale-switcher')
                 </div>
                 <div class="w-full max-w-md">
-                    {{ $slot }}
+                    @yield('content')
                 </div>
             </section>
         </div>
-        @livewireScripts
     </body>
 </html>

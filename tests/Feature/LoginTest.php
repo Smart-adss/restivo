@@ -2,10 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Domain\Identity\Livewire\Login;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
@@ -33,28 +31,38 @@ class LoginTest extends TestCase
     {
         User::factory()->create(['email' => 'cashier@example.com']);
 
-        Livewire::test(Login::class)
-            ->set('email', 'missing@example.com')
-            ->set('password', 'Password123')
-            ->call('authenticate')
-            ->assertHasErrors('email');
+        $this->followingRedirects()
+            ->from(route('login'))
+            ->post(route('login.store'), [
+                'email' => 'missing@example.com',
+                'password' => 'Password123',
+            ])
+            ->assertSee('بيانات الدخول غير صحيحة.');
 
-        Livewire::test(Login::class)
-            ->set('email', 'cashier@example.com')
-            ->set('password', 'wrong-password')
-            ->call('authenticate')
+        $this->followingRedirects()
+            ->from(route('login'))
+            ->post(route('login.store'), [
+                'email' => 'cashier@example.com',
+                'password' => 'wrong-password',
+            ])
             ->assertSee('بيانات الدخول غير صحيحة.');
     }
 
     public function test_login_locks_after_five_failures(): void
     {
-        $component = Livewire::test(Login::class)->set('email', 'cashier@example.com');
-
         for ($attempt = 0; $attempt < 5; $attempt++) {
-            $component->set('password', 'wrong-password')->call('authenticate');
+            $this->from(route('login'))->post(route('login.store'), [
+                'email' => 'cashier@example.com',
+                'password' => 'wrong-password',
+            ]);
         }
 
-        $component->call('authenticate')
+        $this->followingRedirects()
+            ->from(route('login'))
+            ->post(route('login.store'), [
+                'email' => 'cashier@example.com',
+                'password' => 'wrong-password',
+            ])
             ->assertSee('محاولات كثيرة');
     }
 
@@ -69,16 +77,12 @@ class LoginTest extends TestCase
             'password' => 'Password123',
         ]);
 
-        Livewire::test(Login::class)
-            ->set('email', 'cashier@example.com')
-            ->set('password', 'Password123')
-            ->call('authenticate')
-            ->assertRedirect(route('app.home'));
+        $this->post(route('login.store'), [
+            'email' => 'cashier@example.com',
+            'password' => 'Password123',
+        ])->assertRedirect(route('app.home'));
 
         $this->assertAuthenticatedAs($user);
-        // Livewire's test runner does not terminate the HTTP kernel, so flush the database session handler explicitly.
-        app('session')->driver()->save();
-
         $this->assertDatabaseHas('sessions', [
             'user_id' => $user->id,
         ]);
@@ -92,18 +96,18 @@ class LoginTest extends TestCase
             'status' => 'disabled',
         ]);
 
-        Livewire::test(Login::class)
-            ->set('email', 'cashier@example.com')
-            ->set('password', 'Password123')
-            ->call('authenticate')
+        $this->followingRedirects()
+            ->post(route('login.store'), [
+                'email' => 'cashier@example.com',
+                'password' => 'Password123',
+            ])
             ->assertSee('هذا الحساب موقوف.');
-
         $this->assertGuest();
     }
 
     public function test_platform_login_respects_the_totp_gate(): void
     {
-        $user = User::factory()->create([
+        User::factory()->create([
             'email' => 'admin@example.com',
             'password' => 'Password123',
             'is_platform_user' => true,
@@ -111,23 +115,21 @@ class LoginTest extends TestCase
 
         config(['restivo.require_platform_totp' => false]);
 
-        Livewire::test(Login::class)
-            ->set('email', 'admin@example.com')
-            ->set('password', 'Password123')
-            ->call('authenticate')
-            ->assertRedirect(route('platform.tenants.index'));
+        $this->post(route('login.store'), [
+            'email' => 'admin@example.com',
+            'password' => 'Password123',
+        ])->assertRedirect(route('platform.tenants.index'));
 
-        $this->assertAuthenticatedAs($user);
+        $this->assertAuthenticated();
 
-        auth()->logout();
+        $this->post(route('logout'));
 
         config(['restivo.require_platform_totp' => true]);
 
-        Livewire::test(Login::class)
-            ->set('email', 'admin@example.com')
-            ->set('password', 'Password123')
-            ->call('authenticate')
-            ->assertRedirect(route('platform.totp.setup'));
+        $this->post(route('login.store'), [
+            'email' => 'admin@example.com',
+            'password' => 'Password123',
+        ])->assertRedirect(route('platform.totp.setup'));
     }
 
     public function test_guests_cannot_open_the_shell(): void
