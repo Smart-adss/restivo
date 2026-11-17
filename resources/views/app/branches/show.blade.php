@@ -4,9 +4,14 @@
     @php($field = 'w-full rounded-md border border-line bg-white px-3 py-3 text-start outline-none focus:border-brand')
     <div class="flex flex-wrap items-center justify-between gap-4">
         <h1 class="text-2xl font-semibold">{{ $branch->name() }}</h1>
-        @if (app(\App\Support\Features\FeatureGate::class)->allows('module.digital_menu'))
-            <a href="{{ route('public.menu.show', ['slug' => auth()->user()->tenant->slug, 'branchPublicId' => $branch->public_id]) }}" class="min-h-11 rounded-lg border border-line px-3 text-sm hover:bg-canvas" target="_blank" rel="noopener">{{ __('app.open_public_menu') }}</a>
-        @endif
+        <div class="flex flex-wrap gap-2">
+            @if (app(\App\Support\Features\FeatureGate::class)->allows('module.digital_menu'))
+                <a href="{{ route('public.menu.show', ['slug' => auth()->user()->tenant->slug, 'branchPublicId' => $branch->public_id]) }}" class="min-h-11 rounded-lg border border-line px-3 text-sm hover:bg-canvas" target="_blank" rel="noopener">{{ __('app.open_public_menu') }}</a>
+            @endif
+            @if (app(\App\Support\Features\FeatureGate::class)->allows('module.reservations'))
+                <a href="{{ route('public.reservations.show', ['slug' => auth()->user()->tenant->slug, 'branchPublicId' => $branch->public_id]) }}" class="min-h-11 rounded-lg border border-line px-3 text-sm hover:bg-canvas" target="_blank" rel="noopener">{{ __('app.book_table') }}</a>
+            @endif
+        </div>
     </div>
     <dl class="mt-6 max-w-xl space-y-3 rounded-lg border border-line bg-white px-4 py-4 text-sm">
         <div class="flex justify-between gap-4"><dt class="text-ink/60">{{ __('app.branch_code') }}</dt><dd>{{ $branch->code }}</dd></div>

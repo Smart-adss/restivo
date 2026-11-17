@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\PublicOrderController;
+use App\Http\Controllers\Api\PublicReservationController;
 use App\Http\Middleware\ResolvePublicTenant;
 use Illuminate\Support\Facades\Route;
 
@@ -17,4 +18,11 @@ Route::prefix('v1/public/{slug}')
 
         Route::get('/orders/{orderPublicId}', [PublicOrderController::class, 'show'])
             ->name('api.public.orders.show');
+
+        Route::get('/branches/{branchPublicId}/reservation-slots', [PublicReservationController::class, 'slots'])
+            ->name('api.public.reservations.slots');
+
+        Route::post('/reservations', [PublicReservationController::class, 'store'])
+            ->middleware('throttle:public-reservations')
+            ->name('api.public.reservations.store');
     });
