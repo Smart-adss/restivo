@@ -9,6 +9,7 @@ use App\Http\Controllers\Menu\CategoryController;
 use App\Http\Controllers\Menu\ProductController;
 use App\Http\Controllers\Menu\ThemeController;
 use App\Http\Controllers\Platform\AuditController;
+use App\Http\Controllers\Platform\FailedJobController;
 use App\Http\Controllers\DiningTableController;
 use App\Http\Controllers\OrderBoardController;
 use App\Http\Controllers\PublicMenuController;
@@ -76,6 +77,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
             Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
             Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
+            Route::get('/failed-jobs', [FailedJobController::class, 'index'])->name('failed-jobs.index');
             Route::get('/support', [PlatformSupportController::class, 'index'])->name('support.index');
             Route::get('/support/{publicId}', [PlatformSupportController::class, 'show'])->name('support.show');
             Route::post('/support/{publicId}', [PlatformSupportController::class, 'reply'])->name('support.reply');
