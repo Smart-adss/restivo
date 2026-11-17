@@ -5,6 +5,12 @@
 
     RewriteEngine On
 
+    # Block sensitive paths if the document root is mis-pointed at the project root.
+    RewriteRule (^|/)\.env - [F,L]
+    RewriteRule (^|/)artisan$ - [F,L]
+    RewriteRule (^|/)composer\.(json|lock)$ - [F,L]
+    RewriteRule (^|/)(app|bootstrap|config|database|resources|routes|storage|tests|vendor)/ - [F,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -22,4 +28,10 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(^\.env|^\.env\.|artisan$|composer\.(json|lock)$)">
+        Require all denied
+    </FilesMatch>
 </IfModule>

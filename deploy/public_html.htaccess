@@ -1,0 +1,18 @@
+# Fallback document-root rules when Laravel cannot live above public_html (A-06).
+# Prefer pointing the vhost at /public instead of using this layout.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RedirectMatch 403 ^/laravel/
+    RedirectMatch 403 ^/(app|bootstrap|config|database|resources|routes|storage|tests|vendor)/
+    RewriteRule (^|/)\.env - [F,L]
+    RewriteRule (^|/)artisan$ - [F,L]
+</IfModule>
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(^\.env|^\.env\.|artisan$)">
+        Require all denied
+    </FilesMatch>
+</IfModule>

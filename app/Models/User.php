@@ -14,8 +14,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'locale', 'status', 'is_platform_user', 'last_login_at'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'locale', 'status', 'is_platform_user', 'last_login_at', 'totp_secret', 'totp_confirmed_at'])]
+#[Hidden(['password', 'remember_token', 'totp_secret'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -98,6 +98,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'totp_confirmed_at' => 'datetime',
+            'totp_secret' => 'encrypted',
             'password' => 'hashed',
             'is_platform_user' => 'boolean',
         ];
