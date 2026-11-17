@@ -4,6 +4,7 @@ namespace App\Domain\Menu\Actions;
 
 use App\Domain\Menu\Support\InvalidProductImage;
 use App\Domain\Menu\Support\ProductImageProcessor;
+use App\Domain\Menu\Support\PublicMenuCache;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Support\Features\FeatureGate;
@@ -39,7 +40,7 @@ class StoreProductImage
             }
 
             try {
-                return ProductImage::query()->create([
+                $image = ProductImage::query()->create([
                     'product_id' => $product->id,
                     'path' => $path,
                     'sort_order' => $count,
@@ -49,6 +50,10 @@ class StoreProductImage
                 Storage::disk('local')->delete($path);
                 throw $e instanceof InvalidProductImage ? $e : new InvalidProductImage($e->getMessage());
             }
+
+            PublicMenuCache::forgetTenant();
+
+            return $image;
         });
     }
 }

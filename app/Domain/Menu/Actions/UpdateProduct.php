@@ -2,6 +2,7 @@
 
 namespace App\Domain\Menu\Actions;
 
+use App\Domain\Menu\Support\PublicMenuCache;
 use App\Models\MenuCategory;
 use App\Models\Product;
 use App\Models\TaxRate;
@@ -60,6 +61,8 @@ class UpdateProduct
             'sku' => $data['sku'] ?? null,
             'is_active' => $data['is_active'] ?? $product->is_active,
         ])->save();
+
+        PublicMenuCache::forgetTenant();
 
         return $product->refresh();
     }

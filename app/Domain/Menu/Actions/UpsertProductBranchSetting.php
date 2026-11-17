@@ -2,6 +2,7 @@
 
 namespace App\Domain\Menu\Actions;
 
+use App\Domain\Menu\Support\PublicMenuCache;
 use App\Models\Branch;
 use App\Models\Product;
 use App\Models\ProductBranchSetting;
@@ -50,6 +51,8 @@ class UpsertProductBranchSetting
                 'created_at' => now(),
             ]);
         }
+
+        PublicMenuCache::forget($branch->id);
 
         return ProductBranchSetting::query()
             ->where('product_id', $product->id)

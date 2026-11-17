@@ -2,6 +2,7 @@
 
 namespace App\Domain\Menu\Actions;
 
+use App\Domain\Menu\Support\PublicMenuCache;
 use App\Models\MenuCategory;
 use App\Support\Features\FeatureGate;
 use Illuminate\Validation\ValidationException;
@@ -36,13 +37,17 @@ class CreateCategory
             }
         }
 
-        return MenuCategory::query()->create([
+        $category = MenuCategory::query()->create([
             'parent_id' => $parentId,
             'name_ar' => $data['name_ar'],
             'name_en' => $data['name_en'],
             'sort_order' => $data['sort_order'] ?? 0,
             'is_active' => $data['is_active'] ?? true,
         ]);
+
+        PublicMenuCache::forgetTenant();
+
+        return $category;
     }
 
     private function assertDigitalMenu(): void

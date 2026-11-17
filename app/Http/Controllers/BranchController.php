@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Menu\Actions\EnsureMenuQrCode;
 use App\Domain\Tenancy\Actions\CreateBranch;
 use App\Models\Branch;
+use App\Models\OperatingHour;
+use App\Models\QrCode;
+use App\Support\Features\FeatureGate;
 use App\Support\Features\LimitExceeded;
 use App\Support\Features\SubscriptionReadOnly;
 use App\Support\Tenancy\TenantContext;
@@ -69,9 +73,56 @@ class BranchController extends Controller
             abort(404);
         }
 
+        $hours = OperatingHour::query()
+            ->where('branch_id', $branch->id)
+            ->orderBy('day_of_week')
+            ->get();
+
+        if ($hours->count() < 7) {
+            $hours = collect(range(0, 6))->map(function (int $day) use ($hours, $branch) {
+                return $hours->firstWhere('day_of_week', $day) ?? new OperatingHour([
+                    'branch_id' => $branch->id,
+                    'day_of_week' => $day,
+                    'opens_at' => '09:00',
+                    'closes_at' => '23:00',
+                    'is_closed' => false,
+                ]);
+            });
+        }
+
+        $qr = QrCode::query()
+            ->where('target_type', 'menu')
+            ->where('target_public_id', $branch->public_id)
+            ->first();
+
         return view('app.branches.show', [
             'branch' => $branch,
+            'hours' => $hours,
+            'qr' => $qr,
         ]);
+    }
+
+    public function storeQr(string $publicId, EnsureMenuQrCode $ensureMenuQrCode, FeatureGate $features): RedirectResponse
+    {
+        abort_unless(auth()->user()->hasPermission('tenant.branches.manage'), 403);
+
+        if (! $features->allows('module.digital_menu')) {
+            abort(404);
+        }
+
+        $branch = Branch::query()->where('public_id', $publicId)->first() ?? abort(404);
+
+        if (! auth()->user()->canAccessBranch($branch)) {
+            abort(404);
+        }
+
+        try {
+            $ensureMenuQrCode->handle($branch, force: true);
+        } catch (SubscriptionReadOnly) {
+            abort(403);
+        }
+
+        return back()->with('status', __('app.qr_generated'));
     }
 
     private function authorizeManage(): void

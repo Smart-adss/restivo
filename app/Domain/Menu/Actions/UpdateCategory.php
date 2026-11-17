@@ -2,6 +2,7 @@
 
 namespace App\Domain\Menu\Actions;
 
+use App\Domain\Menu\Support\PublicMenuCache;
 use App\Models\MenuCategory;
 use App\Support\Features\FeatureGate;
 use Illuminate\Validation\ValidationException;
@@ -52,6 +53,8 @@ class UpdateCategory
             'sort_order' => $data['sort_order'] ?? $category->sort_order,
             'is_active' => $data['is_active'] ?? $category->is_active,
         ])->save();
+
+        PublicMenuCache::forgetTenant();
 
         return $category->refresh();
     }

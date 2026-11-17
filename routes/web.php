@@ -2,11 +2,14 @@
 
 use App\Domain\Identity\Livewire\Login;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\BranchHoursController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\Menu\CategoryController;
 use App\Http\Controllers\Menu\ProductController;
+use App\Http\Controllers\Menu\ThemeController;
 use App\Http\Controllers\Platform\AuditController;
+use App\Http\Controllers\PublicMenuController;
 use App\Http\Controllers\Platform\BillingController;
 use App\Http\Controllers\Platform\PlanController;
 use App\Http\Controllers\Platform\SettingController;
@@ -72,6 +75,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/branches/create', [BranchController::class, 'create'])->name('app.branches.create');
         Route::post('/branches', [BranchController::class, 'store'])->middleware('subscription.writable')->name('app.branches.store');
         Route::get('/branches/{publicId}', [BranchController::class, 'show'])->name('app.branches.show');
+        Route::put('/branches/{publicId}/hours', [BranchHoursController::class, 'update'])->middleware('subscription.writable')->name('app.branches.hours.update');
+        Route::post('/branches/{publicId}/qr', [BranchController::class, 'storeQr'])->middleware('subscription.writable')->name('app.branches.qr.store');
         Route::get('/staff', [StaffController::class, 'index'])->name('app.staff.index');
         Route::get('/staff/create', [StaffController::class, 'create'])->name('app.staff.create');
         Route::post('/staff', [StaffController::class, 'store'])->middleware('subscription.writable')->name('app.staff.store');
@@ -98,6 +103,16 @@ Route::middleware('auth')->group(function () {
             Route::post('/products/{publicId}/images', [ProductController::class, 'storeImage'])->middleware('subscription.writable')->name('products.images.store');
             Route::post('/option-groups/{groupPublicId}/options', [ProductController::class, 'storeOption'])->middleware('subscription.writable')->name('options.store');
             Route::post('/options/{optionPublicId}/branches', [ProductController::class, 'storeOptionBranchSetting'])->middleware('subscription.writable')->name('options.branches.store');
+
+            Route::get('/theme', [ThemeController::class, 'edit'])->name('theme.edit');
+            Route::put('/theme', [ThemeController::class, 'update'])->middleware('subscription.writable')->name('theme.update');
         });
     });
 });
+
+Route::get('/{slug}/menu/{branchPublicId}', [PublicMenuController::class, 'show'])
+    ->where('slug', '[a-z0-9-]{3,40}')
+    ->name('public.menu.show');
+Route::get('/{slug}/menu/{branchPublicId}/qr.png', [PublicMenuController::class, 'qr'])
+    ->where('slug', '[a-z0-9-]{3,40}')
+    ->name('public.menu.qr');

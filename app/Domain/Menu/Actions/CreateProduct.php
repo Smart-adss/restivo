@@ -2,6 +2,7 @@
 
 namespace App\Domain\Menu\Actions;
 
+use App\Domain\Menu\Support\PublicMenuCache;
 use App\Models\MenuCategory;
 use App\Models\Product;
 use App\Models\TaxRate;
@@ -55,21 +56,21 @@ class CreateProduct
                 ]);
             }
 
-            try {
-                return Product::query()->create([
-                    'category_id' => $category->id,
-                    'tax_rate_id' => $taxRateId,
-                    'name_ar' => $data['name_ar'],
-                    'name_en' => $data['name_en'],
-                    'description_ar' => $data['description_ar'] ?? null,
-                    'description_en' => $data['description_en'] ?? null,
-                    'base_price' => $data['base_price'],
-                    'sku' => $data['sku'] ?? null,
-                    'is_active' => $data['is_active'] ?? true,
-                ]);
-            } catch (LimitExceeded $e) {
-                throw $e;
-            }
+            $product = Product::query()->create([
+                'category_id' => $category->id,
+                'tax_rate_id' => $taxRateId,
+                'name_ar' => $data['name_ar'],
+                'name_en' => $data['name_en'],
+                'description_ar' => $data['description_ar'] ?? null,
+                'description_en' => $data['description_en'] ?? null,
+                'base_price' => $data['base_price'],
+                'sku' => $data['sku'] ?? null,
+                'is_active' => $data['is_active'] ?? true,
+            ]);
+
+            PublicMenuCache::forgetTenant();
+
+            return $product;
         });
     }
 }
