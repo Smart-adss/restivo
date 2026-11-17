@@ -10,6 +10,7 @@ use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Features\FeatureGate;
+use App\Support\Features\TenantUsageSnapshot;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
@@ -22,7 +23,10 @@ class TenantController extends Controller
     public function index(): View
     {
         return view('platform.tenants.index', [
-            'tenants' => Tenant::query()->latest()->get(),
+            'tenants' => Tenant::query()
+                ->with(['subscription.plan'])
+                ->latest()
+                ->get(),
         ]);
     }
 
@@ -81,6 +85,7 @@ class TenantController extends Controller
         }
 
         app(FeatureGate::class)->flush();
+        $usage = app(TenantUsageSnapshot::class)->forCurrentTenant($tenant);
 
         return view('platform.tenants.show', [
             'tenant' => $tenant,
@@ -90,6 +95,7 @@ class TenantController extends Controller
             'addonQuantities' => $addonQuantities,
             'effectiveBranchLimit' => app(FeatureGate::class)->limit('branches.max'),
             'effectiveUserLimit' => app(FeatureGate::class)->limit('users.max'),
+            'usage' => $usage,
             'owner' => $this->owner($tenant),
         ]);
     }

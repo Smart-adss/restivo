@@ -71,6 +71,20 @@
             <p class="font-semibold">{{ $subscription->plan->name() }}</p>
             <p class="mt-1">{{ __('app.subscription_status_'.$subscription->status) }}</p>
             <p class="mt-1 text-ink/70">{{ $subscription->current_period_end->timezone('Africa/Cairo')->toDateString() }}</p>
+            <dl class="mt-4 space-y-2 border-t border-line pt-3">
+                <div class="flex justify-between gap-4">
+                    <dt>{{ __('app.branches') }}</dt>
+                    <dd>{{ $usage['branch_count'] }} / {{ $usage['branch_limit'] ?? __('app.unlimited') }}</dd>
+                </div>
+                <div class="flex justify-between gap-4">
+                    <dt>{{ __('app.staff') }}</dt>
+                    <dd>{{ $usage['user_count'] }} / {{ $usage['user_limit'] ?? __('app.unlimited') }}</dd>
+                </div>
+                <div class="flex justify-between gap-4">
+                    <dt>{{ __('app.orders') }}</dt>
+                    <dd>{{ $usage['order_count'] }} / {{ $usage['order_limit'] ?? __('app.unlimited') }}</dd>
+                </div>
+            </dl>
             @foreach ($subscription->invoices as $invoice)
                 <p class="mt-2">{{ $invoice->status }} — {{ $invoice->total }} {{ $invoice->currency_code }}</p>
             @endforeach
