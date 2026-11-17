@@ -2,6 +2,7 @@
 
 namespace App\Domain\Ordering\Actions;
 
+use App\Domain\Kitchen\Actions\CreateKitchenTickets;
 use App\Domain\Ordering\OrderStatusMachine;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
@@ -11,7 +12,10 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class TransitionOrderStatus
 {
-    public function __construct(private FeatureGate $features) {}
+    public function __construct(
+        private FeatureGate $features,
+        private CreateKitchenTickets $createKitchenTickets,
+    ) {}
 
     public function handle(Order $order, string $to, ?int $userId = null): Order
     {
@@ -47,6 +51,10 @@ class TransitionOrderStatus
                 'user_id' => $userId ?? auth()->id(),
                 'created_at' => now(),
             ]);
+
+            if ($to === OrderStatusMachine::ACCEPTED && $locked->source !== 'pos') {
+                $this->createKitchenTickets->handle($locked);
+            }
 
             return $locked->fresh(['items.options', 'discounts']);
         });

@@ -12,7 +12,7 @@
         <form method="POST" action="{{ route('app.menu.products.update', $product->public_id) }}" class="mt-4 max-w-xl space-y-4">
             @csrf
             @method('PUT')
-            @include('app.menu.products._form', ['product' => $product, 'categories' => $categories, 'taxRates' => $taxRates, 'field' => $field])
+            @include('app.menu.products._form', ['product' => $product, 'categories' => $categories, 'taxRates' => $taxRates, 'prepStations' => $prepStations, 'field' => $field])
             <button type="submit" class="flex min-h-11 items-center justify-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
         </form>
     </section>

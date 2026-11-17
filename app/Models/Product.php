@@ -44,6 +44,11 @@ class Product extends Model
         return $this->belongsTo(TaxRate::class);
     }
 
+    public function prepStation(): BelongsTo
+    {
+        return $this->belongsTo(PrepStation::class, 'prep_station_id');
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');

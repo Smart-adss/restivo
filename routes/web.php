@@ -16,6 +16,8 @@ use App\Http\Controllers\PublicOrderPageController;
 use App\Http\Controllers\PublicReservationPageController;
 use App\Http\Controllers\PublicTablePageController;
 use App\Http\Controllers\ReservationBoardController;
+use App\Http\Controllers\DayReportController;
+use App\Http\Controllers\KitchenBoardController;
 use App\Http\Controllers\TablesBoardController;
 use App\Http\Controllers\Platform\BillingController;
 use App\Http\Controllers\Platform\PlanController;
@@ -108,6 +110,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/table-sessions/{publicId}/transfer', [TablesBoardController::class, 'transfer'])->middleware('subscription.writable')->name('app.tables.sessions.transfer');
         Route::post('/orders/{publicId}/splits', [TablesBoardController::class, 'split'])->middleware('subscription.writable')->name('app.orders.splits.store');
         Route::post('/tables/{publicId}/qr', [TablesBoardController::class, 'storeQr'])->middleware('subscription.writable')->name('app.tables.qr.store');
+
+        Route::get('/kitchen', [KitchenBoardController::class, 'index'])->name('app.kitchen.index');
+        Route::get('/kitchen/poll', [KitchenBoardController::class, 'poll'])->name('app.kitchen.poll');
+        Route::post('/kitchen/stations', [KitchenBoardController::class, 'storeStation'])->middleware('subscription.writable')->name('app.kitchen.stations.store');
+        Route::post('/kitchen/tickets/{publicId}/start', [KitchenBoardController::class, 'start'])->middleware('subscription.writable')->name('app.kitchen.tickets.start');
+        Route::post('/kitchen/tickets/{publicId}/ready', [KitchenBoardController::class, 'ready'])->middleware('subscription.writable')->name('app.kitchen.tickets.ready');
+        Route::get('/reports/day', [DayReportController::class, 'show'])->name('app.reports.day');
 
         Route::get('/orders', [OrderBoardController::class, 'index'])->name('app.orders.index');
         Route::get('/orders/poll', [OrderBoardController::class, 'poll'])->name('app.orders.poll');
