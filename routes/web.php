@@ -4,6 +4,8 @@ use App\Domain\Identity\Livewire\Login;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\Menu\CategoryController;
+use App\Http\Controllers\Menu\ProductController;
 use App\Http\Controllers\Platform\AuditController;
 use App\Http\Controllers\Platform\BillingController;
 use App\Http\Controllers\Platform\PlanController;
@@ -78,5 +80,24 @@ Route::middleware('auth')->group(function () {
         Route::post('/support', [SupportTicketController::class, 'store'])->name('app.support.store');
         Route::get('/pos', [PosController::class, 'show'])->name('app.pos');
         Route::post('/pos', [PosController::class, 'store'])->middleware('subscription.writable')->name('app.pos.store');
+
+        Route::prefix('menu')->name('app.menu.')->group(function () {
+            Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+            Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+            Route::post('/categories', [CategoryController::class, 'store'])->middleware('subscription.writable')->name('categories.store');
+            Route::get('/categories/{publicId}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+            Route::put('/categories/{publicId}', [CategoryController::class, 'update'])->middleware('subscription.writable')->name('categories.update');
+
+            Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+            Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+            Route::post('/products', [ProductController::class, 'store'])->middleware('subscription.writable')->name('products.store');
+            Route::get('/products/{publicId}', [ProductController::class, 'show'])->name('products.show');
+            Route::put('/products/{publicId}', [ProductController::class, 'update'])->middleware('subscription.writable')->name('products.update');
+            Route::post('/products/{publicId}/branches', [ProductController::class, 'storeBranchSetting'])->middleware('subscription.writable')->name('products.branches.store');
+            Route::post('/products/{publicId}/option-groups', [ProductController::class, 'storeOptionGroup'])->middleware('subscription.writable')->name('products.option-groups.store');
+            Route::post('/products/{publicId}/images', [ProductController::class, 'storeImage'])->middleware('subscription.writable')->name('products.images.store');
+            Route::post('/option-groups/{groupPublicId}/options', [ProductController::class, 'storeOption'])->middleware('subscription.writable')->name('options.store');
+            Route::post('/options/{optionPublicId}/branches', [ProductController::class, 'storeOptionBranchSetting'])->middleware('subscription.writable')->name('options.branches.store');
+        });
     });
 });
