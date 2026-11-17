@@ -48,6 +48,16 @@
     </select>
     @error('tax_rate_id')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
 </div>
+<div>
+    <label for="prep_station_id" class="mb-1 block text-sm">{{ __('app.prep_station') }}</label>
+    <select id="prep_station_id" name="prep_station_id" class="{{ $field }}">
+        <option value="">{{ __('app.no_prep_station') }}</option>
+        @foreach (($prepStations ?? []) as $station)
+            <option value="{{ $station->id }}" @selected((string) old('prep_station_id', $product?->prep_station_id) === (string) $station->id)>{{ $station->name() }}</option>
+        @endforeach
+    </select>
+    @error('prep_station_id')<p class="mt-1 text-sm text-danger">{{ $message }}</p>@enderror
+</div>
 <label class="flex min-h-11 items-center gap-2 text-sm">
     <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $product?->is_active ?? true))>
     {{ __('app.is_active') }}

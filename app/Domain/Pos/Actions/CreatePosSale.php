@@ -2,6 +2,7 @@
 
 namespace App\Domain\Pos\Actions;
 
+use App\Domain\Kitchen\Actions\CreateKitchenTickets;
 use App\Domain\Ordering\Actions\CreateOrder;
 use App\Models\CashierShift;
 use App\Models\CashMovement;
@@ -18,6 +19,7 @@ class CreatePosSale
     public function __construct(
         private FeatureGate $features,
         private CreateOrder $createOrder,
+        private CreateKitchenTickets $createKitchenTickets,
     ) {}
 
     /**
@@ -148,6 +150,8 @@ class CreatePosSale
                     'created_at' => now(),
                 ]);
             }
+
+            $this->createKitchenTickets->handle($order);
 
             return [
                 'order' => $order->fresh(['items.options', 'payments']),

@@ -25,6 +25,7 @@ class CreateProduct
      *     description_en?: ?string,
      *     sku?: ?string,
      *     tax_rate_id?: ?int,
+     *     prep_station_id?: ?int,
      *     is_active?: bool
      * }  $data
      */
@@ -56,9 +57,18 @@ class CreateProduct
                 ]);
             }
 
+            $prepStationId = $data['prep_station_id'] ?? null;
+
+            if ($prepStationId !== null && ! \App\Models\PrepStation::query()->whereKey($prepStationId)->exists()) {
+                throw ValidationException::withMessages([
+                    'prep_station_id' => __('app.prep_station_unavailable'),
+                ]);
+            }
+
             $product = Product::query()->create([
                 'category_id' => $category->id,
                 'tax_rate_id' => $taxRateId,
+                'prep_station_id' => $prepStationId,
                 'name_ar' => $data['name_ar'],
                 'name_en' => $data['name_en'],
                 'description_ar' => $data['description_ar'] ?? null,

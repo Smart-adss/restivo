@@ -64,6 +64,12 @@
                         @if (auth()->user()->hasPermission('tables.sessions.manage') || auth()->user()->hasPermission('tables.layout.manage'))
                             <a href="{{ route('app.tables.index') }}" class="{{ $navClass(request()->routeIs('app.tables.*')) }}">{{ __('app.floor') }}</a>
                         @endif
+                        @if (app(\App\Support\Features\FeatureGate::class)->allows('module.kitchen') && (auth()->user()->hasPermission('kitchen.tickets.view') || auth()->user()->hasPermission('tenant.settings.manage')))
+                            <a href="{{ route('app.kitchen.index') }}" class="{{ $navClass(request()->routeIs('app.kitchen.*')) }}">{{ __('app.kitchen') }}</a>
+                        @endif
+                        @if (auth()->user()->hasPermission('finance.reports.view'))
+                            <a href="{{ route('app.reports.day') }}" class="{{ $navClass(request()->routeIs('app.reports.*')) }}">{{ __('app.day_report') }}</a>
+                        @endif
                         <a href="{{ route('app.profile') }}" class="{{ $navClass(request()->routeIs('app.profile')) }}">{{ __('app.profile') }}</a>
                     @endif
                 </nav>

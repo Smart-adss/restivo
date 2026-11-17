@@ -14,6 +14,7 @@ use App\Domain\Menu\Support\InvalidProductImage;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\MenuCategory;
+use App\Models\PrepStation;
 use App\Models\Product;
 use App\Models\ProductOption;
 use App\Models\ProductOptionGroup;
@@ -45,6 +46,7 @@ class ProductController extends Controller
         return view('app.menu.products.create', [
             'categories' => MenuCategory::query()->orderBy('sort_order')->get(),
             'taxRates' => TaxRate::query()->where('is_active', true)->orderBy('name')->get(),
+            'prepStations' => PrepStation::query()->where('is_active', true)->orderBy('sort_order')->get(),
         ]);
     }
 
@@ -78,6 +80,7 @@ class ProductController extends Controller
             'branches' => Branch::query()->orderBy('name_ar')->get(),
             'categories' => MenuCategory::query()->orderBy('sort_order')->get(),
             'taxRates' => TaxRate::query()->where('is_active', true)->orderBy('name')->get(),
+            'prepStations' => PrepStation::query()->where('is_active', true)->orderBy('sort_order')->get(),
         ]);
     }
 
@@ -276,6 +279,7 @@ class ProductController extends Controller
      *     description_en: ?string,
      *     sku: ?string,
      *     tax_rate_id: ?int,
+     *     prep_station_id: ?int,
      *     is_active: bool
      * }
      */
@@ -290,6 +294,7 @@ class ProductController extends Controller
             'base_price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
             'sku' => ['nullable', 'string', 'max:64'],
             'tax_rate_id' => ['nullable', 'integer'],
+            'prep_station_id' => ['nullable', 'integer'],
             'is_active' => ['nullable', 'boolean'],
         ], [], [
             'category_id' => __('app.category'),
@@ -300,6 +305,7 @@ class ProductController extends Controller
             'base_price' => __('app.base_price'),
             'sku' => __('app.sku'),
             'tax_rate_id' => __('app.tax_rate'),
+            'prep_station_id' => __('app.prep_station'),
         ]);
 
         return [
@@ -311,6 +317,7 @@ class ProductController extends Controller
             'base_price' => $data['base_price'],
             'sku' => $data['sku'] ?? null,
             'tax_rate_id' => $data['tax_rate_id'] ?? null,
+            'prep_station_id' => $data['prep_station_id'] ?? null,
             'is_active' => $request->boolean('is_active', $product?->is_active ?? true),
         ];
     }
