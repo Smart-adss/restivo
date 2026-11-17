@@ -51,7 +51,7 @@ class CreateProduct
 
             $taxRateId = $data['tax_rate_id'] ?? null;
 
-            if ($taxRateId !== null && ! TaxRate::query()->whereKey($taxRateId)->exists()) {
+            if ($taxRateId !== null && ! TaxRate::query()->whereKey($taxRateId)->where('is_active', true)->exists()) {
                 throw ValidationException::withMessages([
                     'tax_rate_id' => __('app.tax_rate_unavailable'),
                 ]);

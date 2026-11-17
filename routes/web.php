@@ -36,6 +36,7 @@ use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\TaxRateController;
 use App\Http\Controllers\SupportTicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -110,6 +111,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/staff/create', [StaffController::class, 'create'])->name('app.staff.create');
         Route::post('/staff', [StaffController::class, 'store'])->middleware('subscription.writable')->name('app.staff.store');
         Route::get('/subscription', [SubscriptionController::class, 'show'])->name('app.subscription');
+        Route::get('/taxes', [TaxRateController::class, 'index'])->name('app.taxes.index');
+        Route::post('/taxes', [TaxRateController::class, 'store'])->middleware('subscription.writable')->name('app.taxes.store');
+        Route::put('/taxes/{publicId}', [TaxRateController::class, 'update'])->middleware('subscription.writable')->name('app.taxes.update');
         Route::get('/support', [SupportTicketController::class, 'index'])->name('app.support.index');
         Route::post('/support', [SupportTicketController::class, 'store'])->name('app.support.store');
         Route::get('/pos', [PosController::class, 'show'])->name('app.pos');

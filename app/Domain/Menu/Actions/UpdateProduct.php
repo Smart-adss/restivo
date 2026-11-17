@@ -45,7 +45,12 @@ class UpdateProduct
 
         $taxRateId = array_key_exists('tax_rate_id', $data) ? $data['tax_rate_id'] : $product->tax_rate_id;
 
-        if ($taxRateId !== null && ! TaxRate::query()->whereKey($taxRateId)->exists()) {
+        $taxQuery = TaxRate::query()->whereKey($taxRateId);
+        if ((int) $taxRateId !== (int) $product->tax_rate_id) {
+            $taxQuery->where('is_active', true);
+        }
+
+        if ($taxRateId !== null && ! $taxQuery->exists()) {
             throw ValidationException::withMessages([
                 'tax_rate_id' => __('app.tax_rate_unavailable'),
             ]);

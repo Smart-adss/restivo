@@ -20,6 +20,7 @@ class CreateTenant
         private CopySystemRoles $copySystemRoles,
         private CreateBranch $createBranch,
         private StartSubscription $startSubscription,
+        private SeedDefaultTaxRate $seedDefaultTaxRate,
     ) {}
 
     /**
@@ -49,6 +50,7 @@ class CreateTenant
             app(TenantContext::class)->set($tenant->id);
             $this->copySystemRoles->copyTo($tenant);
             $this->storeDefaultSettings($tenant->id);
+            $this->seedDefaultTaxRate->handle();
             $this->startSubscription->handle(
                 $tenant,
                 $data['plan_code'] ?? 'starter',

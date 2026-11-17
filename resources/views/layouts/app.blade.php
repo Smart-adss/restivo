@@ -51,6 +51,7 @@
                         @endif
                         @if (auth()->user()->hasPermission('tenant.settings.manage'))
                             <a href="{{ route('app.subscription') }}" class="{{ $navClass(request()->routeIs('app.subscription')) }}">{{ __('app.subscription') }}</a>
+                            <a href="{{ route('app.taxes.index') }}" class="{{ $navClass(request()->routeIs('app.taxes.*')) }}">{{ __('app.taxes') }}</a>
                         @endif
                         <a href="{{ route('app.support.index') }}" class="{{ $navClass(request()->routeIs('app.support.*')) }}">{{ __('app.support') }}</a>
                         @if (auth()->user()->hasPermission('orders.orders.view') && app(\App\Support\Features\FeatureGate::class)->allows('module.online_ordering'))
