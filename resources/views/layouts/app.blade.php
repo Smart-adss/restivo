@@ -55,6 +55,9 @@
                         @if (auth()->user()->hasPermission('orders.orders.view') && app(\App\Support\Features\FeatureGate::class)->allows('module.online_ordering'))
                             <a href="{{ route('app.orders.index') }}" class="{{ $navClass(request()->routeIs('app.orders.*')) }}">{{ __('app.orders') }}</a>
                         @endif
+                        @if (auth()->user()->hasPermission('reservations.reservations.manage') && app(\App\Support\Features\FeatureGate::class)->allows('module.reservations'))
+                            <a href="{{ route('app.reservations.index') }}" class="{{ $navClass(request()->routeIs('app.reservations.*')) }}">{{ __('app.reservations') }}</a>
+                        @endif
                         @if (app(\App\Support\Features\FeatureGate::class)->allows('module.pos'))
                             <a href="{{ route('app.pos') }}" class="{{ $navClass(request()->routeIs('app.pos')) }}">{{ __('app.pos') }}</a>
                         @endif

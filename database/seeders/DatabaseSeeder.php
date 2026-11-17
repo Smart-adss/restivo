@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             AccessCatalogSeeder::class,
             PlanCatalogSeeder::class,
             PlatformAdminSeeder::class,
+            NotificationTemplateSeeder::class,
         ]);
     }
 }

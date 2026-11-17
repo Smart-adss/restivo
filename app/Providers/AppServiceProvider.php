@@ -26,5 +26,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('public-orders', function (Request $request) {
             return Limit::perHour(10)->by($request->ip().'|'.$request->route('slug'));
         });
+
+        RateLimiter::for('public-reservations', function (Request $request) {
+            return Limit::perHour(5)->by($request->ip().'|'.$request->route('slug'));
+        });
     }
 }

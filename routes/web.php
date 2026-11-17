@@ -9,9 +9,12 @@ use App\Http\Controllers\Menu\CategoryController;
 use App\Http\Controllers\Menu\ProductController;
 use App\Http\Controllers\Menu\ThemeController;
 use App\Http\Controllers\Platform\AuditController;
+use App\Http\Controllers\DiningTableController;
 use App\Http\Controllers\OrderBoardController;
 use App\Http\Controllers\PublicMenuController;
 use App\Http\Controllers\PublicOrderPageController;
+use App\Http\Controllers\PublicReservationPageController;
+use App\Http\Controllers\ReservationBoardController;
 use App\Http\Controllers\Platform\BillingController;
 use App\Http\Controllers\Platform\PlanController;
 use App\Http\Controllers\Platform\SettingController;
@@ -93,6 +96,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/orders/{publicId}/status', [OrderBoardController::class, 'status'])->middleware('subscription.writable')->name('app.orders.status');
         Route::post('/orders/{publicId}/cancel', [OrderBoardController::class, 'cancel'])->middleware('subscription.writable')->name('app.orders.cancel');
 
+        Route::get('/reservations', [ReservationBoardController::class, 'index'])->name('app.reservations.index');
+        Route::post('/reservations/{publicId}/confirm', [ReservationBoardController::class, 'confirm'])->middleware('subscription.writable')->name('app.reservations.confirm');
+        Route::post('/reservations/{publicId}/cancel', [ReservationBoardController::class, 'cancel'])->middleware('subscription.writable')->name('app.reservations.cancel');
+        Route::post('/reservations/{publicId}/no-show', [ReservationBoardController::class, 'noShow'])->middleware('subscription.writable')->name('app.reservations.no-show');
+        Route::post('/dining-tables', [DiningTableController::class, 'store'])->middleware('subscription.writable')->name('app.dining-tables.store');
+
         Route::prefix('menu')->name('app.menu.')->group(function () {
             Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
             Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
@@ -126,3 +135,6 @@ Route::get('/{slug}/menu/{branchPublicId}/qr.png', [PublicMenuController::class,
 Route::get('/{slug}/orders/{orderPublicId}', [PublicOrderPageController::class, 'track'])
     ->where('slug', '[a-z0-9-]{3,40}')
     ->name('public.orders.track');
+Route::get('/{slug}/reservations/{branchPublicId}', [PublicReservationPageController::class, 'show'])
+    ->where('slug', '[a-z0-9-]{3,40}')
+    ->name('public.reservations.show');
