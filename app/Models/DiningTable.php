@@ -7,6 +7,7 @@ use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DiningTable extends Model
 {
@@ -41,5 +42,15 @@ class DiningTable extends Model
     {
         return $this->belongsToMany(Reservation::class, 'reservation_tables', 'table_id', 'reservation_id')
             ->withPivot('tenant_id');
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(TableSession::class, 'table_id');
+    }
+
+    public function openSession(): ?TableSession
+    {
+        return $this->sessions()->where('status', 'open')->latest('id')->first();
     }
 }

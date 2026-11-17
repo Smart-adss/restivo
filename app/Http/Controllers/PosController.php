@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Ordering\Actions\ApplyManualDiscount;
 use App\Domain\Ordering\Support\ProductUnavailable;
 use App\Domain\Pos\Actions\CloseShift;
 use App\Domain\Pos\Actions\CreatePosSale;
+use App\Domain\Pos\Actions\CreateRefund;
 use App\Domain\Pos\Actions\EnsureReceiptTemplate;
 use App\Domain\Pos\Actions\OpenShift;
 use App\Domain\Pos\Actions\RecordCashMovement;
@@ -183,6 +185,7 @@ class PosController extends Controller
             'idempotency_key' => ['required', 'string', 'size:26'],
             'type' => ['nullable', 'in:dine_in,pickup'],
             'notes' => ['nullable', 'string', 'max:500'],
+            'table_session_id' => ['nullable', 'integer'],
             'items' => ['required', 'array', 'min:1', 'max:30'],
             'items.*.product_id' => ['required', 'integer'],
             'items.*.quantity' => ['required', 'numeric', 'min:1', 'max:99'],
@@ -248,5 +251,86 @@ class PosController extends Controller
             'order' => $order,
             'template' => $template,
         ]);
+    }
+
+    public function refund(Request $request, string $publicId, CreateRefund $createRefund): JsonResponse
+    {
+        $order = Order::query()->where('public_id', $publicId)->first() ?? abort(404);
+        abort_unless(auth()->user()->canAccessBranch($order->branch), 404);
+
+        $data = $request->validate([
+            'payment_id' => ['required', 'string', 'size:26'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'reason' => ['required', 'string', 'max:255'],
+            'idempotency_key' => ['required', 'string', 'size:26'],
+        ]);
+
+        $payment = Payment::query()
+            ->where('public_id', $data['payment_id'])
+            ->where('order_id', $order->id)
+            ->first();
+
+        if ($payment === null) {
+            throw ValidationException::withMessages([
+                'payment_id' => __('app.refund_payment_unavailable'),
+            ]);
+        }
+
+        try {
+            $refund = $createRefund->handle($order, [
+                'payment_id' => $payment->id,
+                'amount' => $data['amount'],
+                'reason' => $data['reason'],
+                'idempotency_key' => $data['idempotency_key'],
+            ]);
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'message' => collect($exception->errors())->flatten()->first(),
+                'error' => ['fields' => $exception->errors()],
+            ], 422);
+        } catch (HttpException $exception) {
+            return response()->json(['message' => $exception->getMessage()], $exception->getStatusCode());
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $refund->public_id,
+                'amount' => (string) $refund->amount,
+                'status' => $refund->status,
+            ],
+        ], 201);
+    }
+
+    public function manualDiscount(Request $request, string $publicId, ApplyManualDiscount $applyManualDiscount): JsonResponse
+    {
+        $order = Order::query()->where('public_id', $publicId)->first() ?? abort(404);
+        abort_unless(auth()->user()->canAccessBranch($order->branch), 404);
+
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'reason' => ['required', 'string', 'max:190'],
+        ]);
+
+        try {
+            $discount = $applyManualDiscount->handle($order, (string) $data['amount'], $data['reason']);
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'message' => collect($exception->errors())->flatten()->first(),
+                'error' => ['fields' => $exception->errors()],
+            ], 422);
+        } catch (HttpException $exception) {
+            return response()->json(['message' => $exception->getMessage()], $exception->getStatusCode());
+        }
+
+        $order->refresh();
+
+        return response()->json([
+            'data' => [
+                'label' => $discount->label,
+                'amount' => (string) $discount->amount,
+                'order_total' => (string) $order->total,
+                'discount_total' => (string) $order->discount_total,
+            ],
+        ], 201);
     }
 }

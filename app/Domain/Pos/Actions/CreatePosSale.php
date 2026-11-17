@@ -26,6 +26,7 @@ class CreatePosSale
      *   idempotency_key: string,
      *   type?: string,
      *   notes?: ?string,
+     *   table_session_id?: ?int,
      *   items: list<array{product_id: int, quantity: mixed, notes?: ?string, option_ids?: list<int>}>,
      *   payments: list<array{method: string, amount: string|float|int}>
      * }  $data
@@ -85,6 +86,7 @@ class CreatePosSale
                 'notes' => $data['notes'] ?? null,
                 'items' => $data['items'],
                 'cashier_shift_id' => $shift->id,
+                'table_session_id' => $data['table_session_id'] ?? null,
                 'status' => 'completed',
             ]);
 
