@@ -101,6 +101,35 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_platform_login_respects_the_totp_gate(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'admin@example.com',
+            'password' => 'Password123',
+            'is_platform_user' => true,
+        ]);
+
+        config(['restivo.require_platform_totp' => false]);
+
+        Livewire::test(Login::class)
+            ->set('email', 'admin@example.com')
+            ->set('password', 'Password123')
+            ->call('authenticate')
+            ->assertRedirect(route('platform.tenants.index'));
+
+        $this->assertAuthenticatedAs($user);
+
+        auth()->logout();
+
+        config(['restivo.require_platform_totp' => true]);
+
+        Livewire::test(Login::class)
+            ->set('email', 'admin@example.com')
+            ->set('password', 'Password123')
+            ->call('authenticate')
+            ->assertRedirect(route('platform.totp.setup'));
+    }
+
     public function test_guests_cannot_open_the_shell(): void
     {
         $this->get(route('app.home'))->assertRedirect(route('login'));

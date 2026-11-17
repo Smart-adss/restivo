@@ -89,11 +89,13 @@ class Login extends Component
 
         $user->forceFill(['last_login_at' => now()])->save();
 
-        if ($user->is_platform_user) {
+        if ($user->is_platform_user && config('restivo.require_platform_totp')) {
             session()->forget('platform_totp_ok');
             $destination = $user->totp_confirmed_at
                 ? route('platform.totp.challenge')
                 : route('platform.totp.setup');
+        } elseif ($user->is_platform_user) {
+            $destination = route('platform.tenants.index');
         } else {
             $destination = route('app.home');
         }
