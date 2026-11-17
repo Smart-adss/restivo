@@ -40,3 +40,4 @@ curl -o /dev/null -s -w '%{time_total}\n' https://{domain}/{slug}/menu
 - شاشة ضريبة المالك (14٪ غير شامل افتراضياً).
 - مشرف المنصة يرى الاستخدام: فروع / موظفون / طلبات الشهر مقابل الحد (FR-P-05).
 - قائمة الإطلاق التجاري موقّعة محلياً؛ المتبقي للمزوّد: MySQL الحي، HTTPS، استعادة نسخة، ثلاثة أيام تجريب حية.
+- مسار الإنتاج: `docs/19-production-golive.md` + `php artisan ops:production-ready` (و`--strict` بعد تسجيل TOTP).

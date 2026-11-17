@@ -28,3 +28,16 @@
 4. عند الفشل راجع `failed_jobs` و`storage/logs`.
 
 على الاختبار المحلي يستخدم `MAIL_MAILER=array`؛ الأمر يضع المهمة في الطابور ويؤكد أن المسار يعمل.
+
+## جاهزية الإنتاج
+
+بعد ضبط `.env` على الخادم:
+
+```text
+php artisan ops:production-ready
+php artisan ops:production-ready --strict
+```
+
+الأول يفرض DEBUG=false وHTTPS وTOTP الإلزامي والطابور على database.  
+`--strict` يفشل أيضاً إن لم يُكمل أي مشرف تسجيل TOTP بعد.  
+الترتيب الكامل: `docs/19-production-golive.md`.
