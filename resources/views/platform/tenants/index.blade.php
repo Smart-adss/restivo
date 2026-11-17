@@ -1,31 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex items-center justify-between gap-4">
-        <h1 class="text-2xl font-semibold">{{ __('app.tenants') }}</h1>
-        @if (auth()->user()->hasPermission('platform.tenants.manage'))
-            <a href="{{ route('platform.tenants.create') }}" class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 text-sm font-semibold text-brand-ink">{{ __('app.create_tenant') }}</a>
-        @endif
-    </div>
+    <x-ui.page-header :title="__('app.tenants')" :description="__('app.tenants_index_hint')">
+        <x-slot:actions>
+            @if (auth()->user()->hasPermission('platform.tenants.manage'))
+                <x-ui.button :href="route('platform.tenants.create')" variant="primary">
+                    {{ __('app.create_tenant') }}
+                </x-ui.button>
+            @endif
+        </x-slot:actions>
+    </x-ui.page-header>
 
     @if ($tenants->isEmpty())
-        <p class="mt-6 text-sm text-ink/70">{{ __('app.no_tenants') }}</p>
+        <x-ui.empty-state :title="__('app.no_tenants')" />
     @else
-        <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-white">
+        <ul class="ui-panel divide-y divide-line overflow-hidden !p-0">
             @foreach ($tenants as $tenant)
                 <li>
-                    <a href="{{ route('platform.tenants.show', $tenant->public_id) }}" class="flex items-center justify-between gap-4 px-4 py-3">
-                        <span>
+                    <a href="{{ route('platform.tenants.show', $tenant->public_id) }}" class="flex items-center justify-between gap-4 px-4 py-3 transition hover:bg-canvas/60">
+                        <span class="min-w-0">
                             <span class="block font-semibold">{{ $tenant->displayName() }}</span>
                             <span class="text-sm text-ink/70">{{ $tenant->slug }}</span>
                             @if ($tenant->subscription)
-                                <span class="mt-1 block text-xs text-ink/60">
+                                <span class="mt-1 block text-xs text-ink/55">
                                     {{ $tenant->subscription->plan?->name() }}
                                     · {{ $tenant->subscription->current_period_end?->timezone('Africa/Cairo')->toDateString() }}
                                 </span>
                             @endif
                         </span>
-                        <span class="text-sm">{{ $tenant->status === 'active' ? __('app.status_active') : __('app.status_suspended') }}</span>
+                        <span class="shrink-0 text-sm">{{ $tenant->status === 'active' ? __('app.status_active') : __('app.status_suspended') }}</span>
                     </a>
                 </li>
             @endforeach
