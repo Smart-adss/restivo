@@ -125,6 +125,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/inventory/items', [InventoryController::class, 'storeItem'])->middleware('subscription.writable')->name('app.inventory.items.store');
         Route::post('/inventory/movements', [InventoryController::class, 'storeMovement'])->middleware('subscription.writable')->name('app.inventory.movements.store');
         Route::post('/inventory/recalculate', [InventoryController::class, 'recalculate'])->middleware('subscription.writable')->name('app.inventory.recalculate');
+        Route::post('/inventory/stockout-setting', [InventoryController::class, 'updateStockoutSetting'])->middleware('subscription.writable')->name('app.inventory.stockout-setting');
 
         Route::get('/orders', [OrderBoardController::class, 'index'])->name('app.orders.index');
         Route::get('/orders/poll', [OrderBoardController::class, 'poll'])->name('app.orders.poll');
@@ -152,6 +153,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/products/{publicId}/branches', [ProductController::class, 'storeBranchSetting'])->middleware('subscription.writable')->name('products.branches.store');
             Route::post('/products/{publicId}/option-groups', [ProductController::class, 'storeOptionGroup'])->middleware('subscription.writable')->name('products.option-groups.store');
             Route::post('/products/{publicId}/images', [ProductController::class, 'storeImage'])->middleware('subscription.writable')->name('products.images.store');
+            Route::post('/products/{publicId}/recipe', [ProductController::class, 'storeRecipe'])->middleware('subscription.writable')->name('products.recipe.store');
             Route::post('/option-groups/{groupPublicId}/options', [ProductController::class, 'storeOption'])->middleware('subscription.writable')->name('options.store');
             Route::post('/options/{optionPublicId}/branches', [ProductController::class, 'storeOptionBranchSetting'])->middleware('subscription.writable')->name('options.branches.store');
 

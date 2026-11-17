@@ -30,10 +30,13 @@ class RecordStockMovement
      *   reference_id?: ?int
      * }  $data
      */
-    public function handle(array $data): StockMovement
+    public function handle(array $data, bool $system = false): StockMovement
     {
         $this->features->assertWritable();
-        abort_unless(auth()->user()?->hasPermission('inventory.movements.adjust'), 403);
+
+        if (! $system) {
+            abort_unless(auth()->user()?->hasPermission('inventory.movements.adjust'), 403);
+        }
 
         if (! $this->features->allows('module.inventory')) {
             abort(404);
@@ -58,14 +61,17 @@ class RecordStockMovement
 
         $quantity = number_format((float) $rawQuantity, 3, '.', '');
 
-        if ($kind === 'waste') {
+        if (in_array($kind, ['waste', 'sale', 'transfer_out'], true)) {
             if (bccomp($quantity, '0', 3) !== 1) {
                 throw ValidationException::withMessages([
-                    'quantity' => __('app.stock_waste_quantity_positive'),
+                    'quantity' => __('app.stock_movement_quantity_invalid'),
                 ]);
             }
 
             $quantity = number_format(-1 * abs((float) $quantity), 3, '.', '');
+        }
+
+        if ($kind === 'waste') {
             $note = trim((string) ($data['note'] ?? ''));
 
             if ($note === '') {
@@ -88,7 +94,7 @@ class RecordStockMovement
         $branch = Branch::query()->find($data['branch_id']);
         $item = StockItem::query()->find($data['stock_item_id']);
 
-        if ($branch === null || ! auth()->user()->canAccessBranch($branch)) {
+        if ($branch === null || (! $system && ! auth()->user()->canAccessBranch($branch))) {
             throw ValidationException::withMessages([
                 'branch_id' => __('app.branch_unavailable'),
             ]);
@@ -110,7 +116,7 @@ class RecordStockMovement
             }
         }
 
-        return DB::transaction(function () use ($data, $branch, $item, $kind, $quantity, $key): StockMovement {
+        return DB::transaction(function () use ($data, $branch, $item, $kind, $quantity, $key, $system): StockMovement {
             if ($key !== null && $key !== '') {
                 $existing = StockMovement::query()
                     ->where('idempotency_key', $key)
@@ -140,7 +146,7 @@ class RecordStockMovement
                 'reference_id' => $data['reference_id'] ?? null,
                 'idempotency_key' => $key ?: null,
                 'note' => $data['note'] ?? null,
-                'user_id' => auth()->id(),
+                'user_id' => $system ? null : auth()->id(),
                 'occurred_at' => now(),
                 'created_at' => now(),
             ]);

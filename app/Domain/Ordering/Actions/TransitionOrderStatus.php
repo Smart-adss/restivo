@@ -4,9 +4,11 @@ namespace App\Domain\Ordering\Actions;
 
 use App\Domain\Kitchen\Actions\CreateKitchenTickets;
 use App\Domain\Ordering\OrderStatusMachine;
+use App\Jobs\ConsumeOrderRecipesJob;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Support\Features\FeatureGate;
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -21,7 +23,7 @@ class TransitionOrderStatus
     {
         $this->features->assertWritable();
 
-        return DB::transaction(function () use ($order, $to, $userId): Order {
+        $result = DB::transaction(function () use ($order, $to, $userId): Order {
             /** @var Order $locked */
             $locked = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
 
@@ -58,5 +60,19 @@ class TransitionOrderStatus
 
             return $locked->fresh(['items.options', 'discounts']);
         });
+
+        if ($to === OrderStatusMachine::COMPLETED && $this->features->allows('module.inventory')) {
+            $tenantId = app(TenantContext::class)->id();
+            if ($tenantId !== null) {
+                try {
+                    ConsumeOrderRecipesJob::dispatch($result->id, $tenantId);
+                } catch (\Throwable $exception) {
+                    report($exception);
+                    ConsumeOrderRecipesJob::recordSyncFailure($result->id, $tenantId, $exception);
+                }
+            }
+        }
+
+        return $result;
     }
 }

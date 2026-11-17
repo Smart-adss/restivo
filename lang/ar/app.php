@@ -409,6 +409,22 @@ return [
     'stock_movement_transfer_out' => 'تحويل صادر',
     'stock_movement_waste' => 'هدر',
     'stock_movement_count' => 'جرد',
+    'recipe' => 'الوصفة',
+    'recipe_hint' => 'وصفة واحدة لكل منتج؛ تُستهلك المكوّنات عند اكتمال البيع.',
+    'recipe_saved' => 'تم حفظ الوصفة.',
+    'save_recipe' => 'حفظ الوصفة',
+    'yield_qty' => 'كمية الناتج',
+    'stock_item' => 'صنف المخزون',
+    'unit' => 'الوحدة',
+    'recipe_lines_required' => 'أضف بند وصفة واحداً على الأقل.',
+    'recipe_line_duplicate' => 'لا تكرر نفس الصنف في الوصفة.',
+    'recipe_line_quantity_invalid' => 'كمية بند الوصفة غير صالحة.',
+    'unit_unavailable' => 'الوحدة غير متاحة.',
+    'block_on_stockout' => 'المنع عند نفاد المخزون',
+    'block_on_stockout_hint' => 'مطفأ افتراضياً. عند التشغيل يُرفض البيع إذا نقصت المكوّنات.',
+    'block_on_stockout_enable' => 'منع البيع عند النفاد',
+    'stockout_setting_saved' => 'تم حفظ إعداد النفاد.',
+    'stockout_blocked' => 'لا يمكن إتمام البيع لنقص المخزون.',
 ];
 
 

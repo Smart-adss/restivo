@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Menu;
 
+use App\Domain\Inventory\Actions\UpsertRecipe;
 use App\Domain\Menu\Actions\CreateOption;
 use App\Domain\Menu\Actions\CreateOptionGroup;
 use App\Domain\Menu\Actions\CreateProduct;
@@ -9,6 +10,8 @@ use App\Domain\Menu\Actions\StoreProductImage;
 use App\Domain\Menu\Actions\UpdateProduct;
 use App\Domain\Menu\Actions\UpsertOptionBranchSetting;
 use App\Domain\Menu\Actions\UpsertProductBranchSetting;
+use App\Models\StockItem;
+use App\Models\Unit;
 use App\Domain\Menu\Support\ConflictingDefaultOption;
 use App\Domain\Menu\Support\InvalidProductImage;
 use App\Http\Controllers\Controller;
@@ -73,7 +76,7 @@ class ProductController extends Controller
     {
         $this->authorizeMenu($features);
         $product = $this->findProduct($publicId);
-        $product->load(['category', 'images', 'optionGroups.options', 'branchSettings', 'taxRate']);
+        $product->load(['category', 'images', 'optionGroups.options', 'branchSettings', 'taxRate', 'recipe.lines.stockItem', 'recipe.lines.unit']);
 
         return view('app.menu.products.show', [
             'product' => $product,
@@ -81,7 +84,38 @@ class ProductController extends Controller
             'categories' => MenuCategory::query()->orderBy('sort_order')->get(),
             'taxRates' => TaxRate::query()->where('is_active', true)->orderBy('name')->get(),
             'prepStations' => PrepStation::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'stockItems' => StockItem::query()->where('is_active', true)->with('unit')->orderBy('name_ar')->get(),
+            'units' => Unit::query()->orderBy('name_ar')->get(),
+            'inventoryEnabled' => $features->allows('module.inventory'),
         ]);
+    }
+
+    public function storeRecipe(
+        Request $request,
+        string $publicId,
+        UpsertRecipe $upsertRecipe,
+        FeatureGate $features,
+    ): RedirectResponse {
+        abort_unless($features->allows('module.inventory'), 404);
+        abort_unless(auth()->user()->hasPermission('inventory.items.manage'), 403);
+
+        $product = $this->findProduct($publicId);
+        $data = $request->validate([
+            'yield_qty' => ['nullable', 'numeric', 'min:0.001'],
+            'notes' => ['nullable', 'string', 'max:500'],
+            'lines' => ['required', 'array', 'min:1'],
+            'lines.*.stock_item_id' => ['required', 'integer'],
+            'lines.*.quantity' => ['required', 'numeric', 'min:0.001'],
+            'lines.*.unit_id' => ['required', 'integer'],
+        ]);
+
+        try {
+            $upsertRecipe->handle($product, $data);
+        } catch (SubscriptionReadOnly) {
+            abort(403);
+        }
+
+        return back()->with('status', __('app.recipe_saved'));
     }
 
     public function update(Request $request, string $publicId, UpdateProduct $updateProduct, FeatureGate $features): RedirectResponse

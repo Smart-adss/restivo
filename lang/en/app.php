@@ -409,6 +409,22 @@ return [
     'stock_movement_transfer_out' => 'Transfer out',
     'stock_movement_waste' => 'Waste',
     'stock_movement_count' => 'Count',
+    'recipe' => 'Recipe',
+    'recipe_hint' => 'One recipe per product; ingredients are consumed when a sale completes.',
+    'recipe_saved' => 'Recipe saved.',
+    'save_recipe' => 'Save recipe',
+    'yield_qty' => 'Yield quantity',
+    'stock_item' => 'Stock item',
+    'unit' => 'Unit',
+    'recipe_lines_required' => 'Add at least one recipe line.',
+    'recipe_line_duplicate' => 'Do not repeat the same stock item in a recipe.',
+    'recipe_line_quantity_invalid' => 'Recipe line quantity is invalid.',
+    'unit_unavailable' => 'Unit is unavailable.',
+    'block_on_stockout' => 'Block on stockout',
+    'block_on_stockout_hint' => 'Off by default. When enabled, sales are rejected if ingredients are short.',
+    'block_on_stockout_enable' => 'Block sales when out of stock',
+    'stockout_setting_saved' => 'Stockout setting saved.',
+    'stockout_blocked' => 'Sale blocked due to insufficient stock.',
 ];
 
 
