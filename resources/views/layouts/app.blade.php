@@ -70,6 +70,9 @@
                         @if (auth()->user()->hasPermission('finance.reports.view'))
                             <a href="{{ route('app.reports.day') }}" class="{{ $navClass(request()->routeIs('app.reports.*')) }}">{{ __('app.day_report') }}</a>
                         @endif
+                        @if (app(\App\Support\Features\FeatureGate::class)->allows('module.inventory') && (auth()->user()->hasPermission('inventory.items.manage') || auth()->user()->hasPermission('inventory.movements.adjust')))
+                            <a href="{{ route('app.inventory.index') }}" class="{{ $navClass(request()->routeIs('app.inventory.*')) }}">{{ __('app.inventory') }}</a>
+                        @endif
                         <a href="{{ route('app.profile') }}" class="{{ $navClass(request()->routeIs('app.profile')) }}">{{ __('app.profile') }}</a>
                     @endif
                 </nav>

@@ -17,6 +17,7 @@ use App\Http\Controllers\PublicReservationPageController;
 use App\Http\Controllers\PublicTablePageController;
 use App\Http\Controllers\ReservationBoardController;
 use App\Http\Controllers\DayReportController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\KitchenBoardController;
 use App\Http\Controllers\TablesBoardController;
 use App\Http\Controllers\Platform\BillingController;
@@ -117,6 +118,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/kitchen/tickets/{publicId}/start', [KitchenBoardController::class, 'start'])->middleware('subscription.writable')->name('app.kitchen.tickets.start');
         Route::post('/kitchen/tickets/{publicId}/ready', [KitchenBoardController::class, 'ready'])->middleware('subscription.writable')->name('app.kitchen.tickets.ready');
         Route::get('/reports/day', [DayReportController::class, 'show'])->name('app.reports.day');
+
+        Route::get('/inventory', [InventoryController::class, 'index'])->name('app.inventory.index');
+        Route::post('/inventory/units', [InventoryController::class, 'storeUnit'])->middleware('subscription.writable')->name('app.inventory.units.store');
+        Route::post('/inventory/conversions', [InventoryController::class, 'storeConversion'])->middleware('subscription.writable')->name('app.inventory.conversions.store');
+        Route::post('/inventory/items', [InventoryController::class, 'storeItem'])->middleware('subscription.writable')->name('app.inventory.items.store');
+        Route::post('/inventory/movements', [InventoryController::class, 'storeMovement'])->middleware('subscription.writable')->name('app.inventory.movements.store');
+        Route::post('/inventory/recalculate', [InventoryController::class, 'recalculate'])->middleware('subscription.writable')->name('app.inventory.recalculate');
 
         Route::get('/orders', [OrderBoardController::class, 'index'])->name('app.orders.index');
         Route::get('/orders/poll', [OrderBoardController::class, 'poll'])->name('app.orders.poll');
