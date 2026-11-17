@@ -52,6 +52,9 @@
                             <a href="{{ route('app.subscription') }}" class="{{ $navClass(request()->routeIs('app.subscription')) }}">{{ __('app.subscription') }}</a>
                         @endif
                         <a href="{{ route('app.support.index') }}" class="{{ $navClass(request()->routeIs('app.support.*')) }}">{{ __('app.support') }}</a>
+                        @if (auth()->user()->hasPermission('orders.orders.view') && app(\App\Support\Features\FeatureGate::class)->allows('module.online_ordering'))
+                            <a href="{{ route('app.orders.index') }}" class="{{ $navClass(request()->routeIs('app.orders.*')) }}">{{ __('app.orders') }}</a>
+                        @endif
                         @if (app(\App\Support\Features\FeatureGate::class)->allows('module.pos'))
                             <a href="{{ route('app.pos') }}" class="{{ $navClass(request()->routeIs('app.pos')) }}">{{ __('app.pos') }}</a>
                         @endif
