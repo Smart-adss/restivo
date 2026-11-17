@@ -240,6 +240,56 @@ class TenancyIsolationTest extends TestCase
         ])->assertRedirect(route('app.home'));
     }
 
+    public function test_platform_admin_can_update_the_tenant_profile(): void
+    {
+        $created = app(CreateTenant::class)->handle($this->payload('beta'));
+        $admin = User::query()->where('email', 'admin@example.com')->first();
+        $stranger = User::factory()->create([
+            'email' => 'stranger@example.com',
+            'is_platform_user' => true,
+        ]);
+
+        $this->actingAs($stranger)->post(route('platform.tenants.profile.update', $created['tenant']->public_id), [])
+            ->assertForbidden();
+
+        $this->actingAs($admin)
+            ->from(route('platform.tenants.show', $created['tenant']->public_id))
+            ->post(route('platform.tenants.profile.update', $created['tenant']->public_id), [
+                'legal_name' => 'شركة معدلة',
+                'display_name_ar' => 'اسم جديد',
+                'display_name_en' => 'New name',
+                'email' => 'new-beta@example.com',
+                'phone' => '01022222222',
+                'owner_name' => 'مالك جديد',
+                'owner_email' => 'admin@example.com',
+            ])
+            ->assertSessionHasErrors('owner_email');
+
+        $this->actingAs($admin)
+            ->post(route('platform.tenants.profile.update', $created['tenant']->public_id), [
+                'legal_name' => 'شركة معدلة',
+                'display_name_ar' => 'اسم جديد',
+                'display_name_en' => 'New name',
+                'email' => 'new-beta@example.com',
+                'phone' => '01022222222',
+                'owner_name' => 'مالك جديد',
+                'owner_email' => 'owner-beta-new@example.com',
+            ])
+            ->assertRedirect(route('platform.tenants.show', $created['tenant']->public_id))
+            ->assertSessionHas('status', 'تم حفظ بيانات المنشأة.');
+
+        $this->assertSame('اسم جديد', $created['tenant']->fresh()->display_name_ar);
+        $this->assertSame('beta', $created['tenant']->fresh()->slug);
+        $this->assertSame('مالك جديد', $created['owner']->fresh()->name);
+        $this->assertSame('owner-beta-new@example.com', $created['owner']->fresh()->email);
+
+        $this->actingAsGuest();
+        $this->post(route('login.store'), [
+            'email' => 'owner-beta-new@example.com',
+            'password' => $created['password'],
+        ])->assertRedirect(route('app.home'));
+    }
+
     public function test_owner_can_update_profile(): void
     {
         $created = app(CreateTenant::class)->handle($this->payload('alpha'));

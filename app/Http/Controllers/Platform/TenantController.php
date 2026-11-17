@@ -94,6 +94,65 @@ class TenantController extends Controller
         ]);
     }
 
+    public function updateProfile(Request $request, Tenant $tenant, AuditLogger $audit): RedirectResponse
+    {
+        $this->authorizeManage();
+        $owner = $this->owner($tenant);
+
+        if ($owner === null) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'legal_name' => ['required', 'string', 'max:190'],
+            'display_name_ar' => ['required', 'string', 'max:190'],
+            'display_name_en' => ['required', 'string', 'max:190'],
+            'email' => ['required', 'email', 'max:190'],
+            'phone' => ['required', 'string', 'max:20'],
+            'owner_name' => ['required', 'string', 'max:120'],
+            'owner_email' => ['required', 'email', 'max:190', Rule::unique('users', 'email')->ignore($owner->id)],
+        ], [
+            'owner_email.unique' => __('app.owner_email_taken'),
+        ]);
+
+        $before = [
+            'legal_name' => $tenant->legal_name,
+            'display_name_ar' => $tenant->display_name_ar,
+            'display_name_en' => $tenant->display_name_en,
+            'email' => $tenant->email,
+            'phone' => $tenant->phone,
+            'owner_name' => $owner->name,
+            'owner_email' => $owner->email,
+        ];
+
+        $tenant->update([
+            'legal_name' => $data['legal_name'],
+            'display_name_ar' => $data['display_name_ar'],
+            'display_name_en' => $data['display_name_en'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+        ]);
+        $owner->forceFill([
+            'name' => $data['owner_name'],
+            'email' => $data['owner_email'],
+        ])->save();
+
+        app(TenantContext::class)->set($tenant->id);
+        $audit->log('tenant.profile_updated', $tenant, $before, [
+            'legal_name' => $tenant->legal_name,
+            'display_name_ar' => $tenant->display_name_ar,
+            'display_name_en' => $tenant->display_name_en,
+            'email' => $tenant->email,
+            'phone' => $tenant->phone,
+            'owner_name' => $owner->name,
+            'owner_email' => $owner->email,
+        ]);
+
+        return redirect()
+            ->route('platform.tenants.show', $tenant->public_id)
+            ->with('status', __('app.tenant_profile_saved'));
+    }
+
     public function updateOwnerPassword(Request $request, Tenant $tenant, AuditLogger $audit): RedirectResponse
     {
         $this->authorizeManage();

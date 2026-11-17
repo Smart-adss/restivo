@@ -10,6 +10,33 @@
     </div>
 
     @if (auth()->user()->hasPermission('platform.tenants.manage') && $owner)
+        @php($field = 'w-full rounded-md border border-line bg-white px-3 py-3 text-start outline-none focus:border-brand')
+        <section class="mt-6 max-w-xl rounded-lg border border-line bg-white px-4 py-4">
+            <h2 class="font-semibold">{{ __('app.tenant_profile') }}</h2>
+            <p class="mt-1 text-sm text-ink/70">{{ $tenant->slug }}</p>
+            <form method="POST" action="{{ route('platform.tenants.profile.update', $tenant->public_id) }}" class="mt-4 space-y-3">
+                @csrf
+                @foreach ([
+                    'legal_name' => $tenant->legal_name,
+                    'display_name_ar' => $tenant->display_name_ar,
+                    'display_name_en' => $tenant->display_name_en,
+                    'email' => $tenant->email,
+                    'phone' => $tenant->phone,
+                    'owner_name' => $owner->name,
+                    'owner_email' => $owner->email,
+                ] as $name => $value)
+                    <div>
+                        <label for="{{ $name }}" class="mb-1 block text-sm">{{ __('app.'.$name) }}</label>
+                        <input id="{{ $name }}" name="{{ $name }}" type="{{ str_contains($name, 'email') ? 'email' : 'text' }}" value="{{ old($name, $value) }}" required class="{{ $field }}">
+                        @error($name)
+                            <p class="mt-1 text-sm text-danger">{{ $message }}</p>
+                        @enderror
+                    </div>
+                @endforeach
+                <button type="submit" class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-brand-ink hover:bg-ink">{{ __('app.save') }}</button>
+            </form>
+        </section>
+
         <section class="mt-6 max-w-xl rounded-lg border border-line bg-white px-4 py-4">
             <h2 class="font-semibold">{{ __('app.owner_password') }}</h2>
             <p class="mt-1 text-sm text-ink/70">{{ $owner->email }} — {{ __('app.owner_password_hint') }}</p>
