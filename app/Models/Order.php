@@ -86,4 +86,15 @@ class Order extends Model
     {
         return $this->hasMany(OrderStatusHistory::class);
     }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function cashierShift(): BelongsTo
+    {
+        return $this->belongsTo(CashierShift::class, 'cashier_shift_id');
+    }
 }
+

@@ -46,6 +46,8 @@ class CreateOrder
      *   delivery_address?: ?array,
      *   notes?: ?string,
      *   coupon_code?: ?string,
+     *   cashier_shift_id?: ?int,
+     *   status?: string,
      *   items: list<array{
      *     product_id: int,
      *     quantity: numeric-string|float|int,
@@ -195,12 +197,15 @@ class CreateOrder
                     $customerName = $customer->name;
                 }
 
+                $status = $data['status'] ?? 'placed';
+
                 $order = Order::query()->create([
                     'branch_id' => $branch->id,
                     'number' => $number,
                     'type' => $data['type'],
                     'source' => $data['source'],
-                    'status' => 'placed',
+                    'status' => $status,
+                    'cashier_shift_id' => $data['cashier_shift_id'] ?? null,
                     'customer_id' => $customerId,
                     'customer_name' => $customerName,
                     'customer_phone' => $customerPhone,
@@ -217,6 +222,7 @@ class CreateOrder
                     'prices_include_tax' => $pricesIncludeTax,
                     'idempotency_key' => $data['idempotency_key'],
                     'placed_at' => $placedAt,
+                    'completed_at' => $status === 'completed' ? $placedAt : null,
                 ]);
 
                 foreach ($quote['items'] as $item) {
@@ -269,8 +275,8 @@ class CreateOrder
                 OrderStatusHistory::query()->create([
                     'order_id' => $order->id,
                     'from_status' => null,
-                    'to_status' => 'placed',
-                    'user_id' => null,
+                    'to_status' => $status,
+                    'user_id' => auth()->id(),
                     'created_at' => $placedAt,
                 ]);
 
