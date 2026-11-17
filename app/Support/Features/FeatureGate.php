@@ -13,6 +13,8 @@ class FeatureGate
 
     private ?Subscription $subscription = null;
 
+    private ?int $resolvedTenantId = null;
+
     public function allows(string $key): bool
     {
         return $this->raw($key) === '1';
@@ -60,6 +62,13 @@ class FeatureGate
         }
     }
 
+    public function flush(): void
+    {
+        $this->values = null;
+        $this->subscription = null;
+        $this->resolvedTenantId = null;
+    }
+
     private function raw(string $key): ?string
     {
         $values = $this->resolved();
@@ -76,11 +85,17 @@ class FeatureGate
      */
     private function resolved(): array
     {
-        if ($this->values !== null) {
+        $tenantId = app(TenantContext::class)->id();
+
+        if ($this->values !== null && $this->resolvedTenantId === $tenantId) {
             return $this->values;
         }
 
-        if (app(TenantContext::class)->id() === null) {
+        $this->values = null;
+        $this->subscription = null;
+        $this->resolvedTenantId = $tenantId;
+
+        if ($tenantId === null) {
             return $this->values = [];
         }
 

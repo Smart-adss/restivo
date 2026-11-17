@@ -37,6 +37,17 @@
                         @if (auth()->user()->hasPermission('tenant.users.manage'))
                             <a href="{{ route('app.staff.index') }}" class="{{ $navClass(request()->routeIs('app.staff.*')) }}">{{ __('app.staff') }}</a>
                         @endif
+                        @if (app(\App\Support\Features\FeatureGate::class)->allows('module.digital_menu'))
+                            @if (auth()->user()->hasPermission('menu.categories.manage'))
+                                <a href="{{ route('app.menu.categories.index') }}" class="{{ $navClass(request()->routeIs('app.menu.categories.*')) }}">{{ __('app.categories') }}</a>
+                            @endif
+                            @if (auth()->user()->hasPermission('menu.products.manage'))
+                                <a href="{{ route('app.menu.products.index') }}" class="{{ $navClass(request()->routeIs('app.menu.products.*', 'app.menu.options.*')) }}">{{ __('app.products') }}</a>
+                            @endif
+                            @if (auth()->user()->hasPermission('menu.theme.manage'))
+                                <a href="{{ route('app.menu.theme.edit') }}" class="{{ $navClass(request()->routeIs('app.menu.theme.*')) }}">{{ __('app.menu_theme') }}</a>
+                            @endif
+                        @endif
                         @if (auth()->user()->hasPermission('tenant.settings.manage'))
                             <a href="{{ route('app.subscription') }}" class="{{ $navClass(request()->routeIs('app.subscription')) }}">{{ __('app.subscription') }}</a>
                         @endif
