@@ -7,14 +7,17 @@ use App\Domain\Inventory\Actions\CreateUnit;
 use App\Domain\Inventory\Actions\CreateUnitConversion;
 use App\Domain\Inventory\Actions\RecalculateBranchStocks;
 use App\Domain\Inventory\Actions\RecordStockMovement;
+use App\Domain\Inventory\Actions\AssertIngredientsAvailable;
 use App\Models\BranchStock;
 use App\Models\StockItem;
 use App\Models\StockMovement;
 use App\Models\Unit;
 use App\Models\UnitConversion;
 use App\Support\Features\FeatureGate;
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class InventoryController extends Controller
@@ -48,7 +51,39 @@ class InventoryController extends Controller
             'items' => StockItem::query()->with('unit')->orderBy('name_ar')->get(),
             'stocks' => $stocks,
             'movements' => $movements,
+            'block_on_stockout' => app(AssertIngredientsAvailable::class)->blockOnStockout($branch->id),
         ]);
+    }
+
+    public function updateStockoutSetting(Request $request, FeatureGate $features): RedirectResponse
+    {
+        abort_unless($features->allows('module.inventory'), 404);
+        abort_unless(auth()->user()->hasPermission('inventory.items.manage'), 403);
+
+        $data = $request->validate([
+            'branch_id' => ['required', 'integer'],
+            'block_on_stockout' => ['nullable', 'boolean'],
+        ]);
+
+        $branchIds = auth()->user()->visibleBranches()->pluck('id');
+        abort_unless($branchIds->contains((int) $data['branch_id']), 403);
+
+        $enabled = $request->boolean('block_on_stockout');
+
+        DB::table('branch_settings')->updateOrInsert(
+            [
+                'branch_id' => $data['branch_id'],
+                'key' => 'inventory.block_on_stockout',
+            ],
+            [
+                'tenant_id' => app(TenantContext::class)->id(),
+                'value' => json_encode($enabled),
+            ],
+        );
+
+        return redirect()
+            ->route('app.inventory.index', ['branch_id' => $data['branch_id']])
+            ->with('status', __('app.stockout_setting_saved'));
     }
 
     public function storeUnit(Request $request, CreateUnit $createUnit, FeatureGate $features): RedirectResponse

@@ -2,14 +2,17 @@
 
 namespace App\Domain\Pos\Actions;
 
+use App\Domain\Inventory\Actions\AssertIngredientsAvailable;
 use App\Domain\Kitchen\Actions\CreateKitchenTickets;
 use App\Domain\Ordering\Actions\CreateOrder;
+use App\Jobs\ConsumeOrderRecipesJob;
 use App\Models\CashierShift;
 use App\Models\CashMovement;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Support\Features\FeatureGate;
 use App\Support\Money\Money;
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -20,6 +23,7 @@ class CreatePosSale
         private FeatureGate $features,
         private CreateOrder $createOrder,
         private CreateKitchenTickets $createKitchenTickets,
+        private AssertIngredientsAvailable $assertIngredientsAvailable,
     ) {}
 
     /**
@@ -56,7 +60,7 @@ class CreatePosSale
             ];
         }
 
-        return DB::transaction(function () use ($data): array {
+        $result = DB::transaction(function () use ($data): array {
             $shift = CashierShift::query()
                 ->whereKey($data['shift_id'])
                 ->lockForUpdate()
@@ -79,6 +83,8 @@ class CreatePosSale
             if ($requireShift && $shift->status !== 'open') {
                 throw new HttpException(409, 'An open shift is required.');
             }
+
+            $this->assertIngredientsAvailable->handle($shift->branch_id, $data['items']);
 
             $order = $this->createOrder->handle([
                 'branch_id' => $shift->branch_id,
@@ -158,5 +164,20 @@ class CreatePosSale
                 'payments' => $payments,
             ];
         });
+
+        if ($this->features->allows('module.inventory')) {
+            $tenantId = app(TenantContext::class)->id();
+            if ($tenantId !== null) {
+                try {
+                    ConsumeOrderRecipesJob::dispatch($result['order']->id, $tenantId);
+                } catch (\Throwable $exception) {
+                    report($exception);
+                    // Sync driver: worker is not running, so persist to failed_jobs here (P5-S13-03).
+                    ConsumeOrderRecipesJob::recordSyncFailure($result['order']->id, $tenantId, $exception);
+                }
+            }
+        }
+
+        return $result;
     }
 }

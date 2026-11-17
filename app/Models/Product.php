@@ -7,6 +7,7 @@ use App\Models\Concerns\HasPublicId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 
 class Product extends Model
@@ -47,6 +48,11 @@ class Product extends Model
     public function prepStation(): BelongsTo
     {
         return $this->belongsTo(PrepStation::class, 'prep_station_id');
+    }
+
+    public function recipe(): HasOne
+    {
+        return $this->hasOne(Recipe::class);
     }
 
     public function images(): HasMany

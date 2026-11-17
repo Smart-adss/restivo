@@ -75,6 +75,48 @@
         </form>
     </section>
 
+    @if (! empty($inventoryEnabled) && auth()->user()->hasPermission('inventory.items.manage'))
+        <section class="mt-8 rounded-lg border border-line bg-white px-4 py-5">
+            <h2 class="text-lg font-semibold">{{ __('app.recipe') }}</h2>
+            <p class="mt-1 text-sm text-ink/70">{{ __('app.recipe_hint') }}</p>
+            @if ($product->recipe)
+                <ul class="mt-4 space-y-2 text-sm">
+                    @foreach ($product->recipe->lines as $line)
+                        <li class="border-b border-line py-2">
+                            {{ $line->stockItem?->name() ?? $line->stock_item_id }}
+                            · {{ $line->quantity }}
+                            {{ $line->unit?->abbreviation }}
+                        </li>
+                    @endforeach
+                </ul>
+                <p class="mt-2 text-sm text-ink/70">{{ __('app.yield_qty') }}: {{ $product->recipe->yield_qty }}</p>
+            @endif
+            <form method="POST" action="{{ route('app.menu.products.recipe.store', $product->public_id) }}" class="mt-4 space-y-3">
+                @csrf
+                <div class="grid gap-3 md:grid-cols-2">
+                    <input name="yield_qty" type="number" step="0.001" min="0.001" value="{{ old('yield_qty', $product->recipe?->yield_qty ?? '1') }}" placeholder="{{ __('app.yield_qty') }}" class="{{ $field }}">
+                    <input name="notes" maxlength="500" value="{{ old('notes', $product->recipe?->notes) }}" placeholder="{{ __('app.notes') }}" class="{{ $field }}">
+                </div>
+                <div class="grid gap-3 md:grid-cols-3">
+                    <select name="lines[0][stock_item_id]" required class="{{ $field }}">
+                        <option value="">{{ __('app.stock_item') }}</option>
+                        @foreach ($stockItems as $item)
+                            <option value="{{ $item->id }}">{{ $item->name() }} ({{ $item->unit?->abbreviation }})</option>
+                        @endforeach
+                    </select>
+                    <input name="lines[0][quantity]" type="number" step="0.001" min="0.001" required placeholder="{{ __('app.quantity') }}" class="{{ $field }}">
+                    <select name="lines[0][unit_id]" required class="{{ $field }}">
+                        <option value="">{{ __('app.unit') }}</option>
+                        @foreach ($units as $unit)
+                            <option value="{{ $unit->id }}">{{ $unit->name() }} ({{ $unit->abbreviation }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="min-h-11 rounded-lg bg-brand hover:bg-ink px-4 text-sm font-semibold text-brand-ink">{{ __('app.save_recipe') }}</button>
+            </form>
+        </section>
+    @endif
+
     <section class="mt-8 rounded-lg border border-line bg-white px-4 py-5">
         <h2 class="text-lg font-semibold">{{ __('app.option_groups') }}</h2>
         <div class="mt-4 space-y-6">

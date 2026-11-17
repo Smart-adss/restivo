@@ -73,6 +73,18 @@
                 <input name="sku" maxlength="64" placeholder="SKU" class="min-h-11 w-full rounded-lg border border-line px-3">
                 <button class="min-h-11 rounded-lg bg-brand px-4 text-sm font-semibold text-brand-ink">{{ __('app.save') }}</button>
             </form>
+
+            <form method="POST" action="{{ route('app.inventory.stockout-setting') }}" class="space-y-3 rounded-lg border border-line bg-white p-4">
+                @csrf
+                <input type="hidden" name="branch_id" value="{{ $branch->id }}">
+                <h2 class="font-semibold">{{ __('app.block_on_stockout') }}</h2>
+                <p class="text-sm text-ink/70">{{ __('app.block_on_stockout_hint') }}</p>
+                <label class="flex min-h-11 items-center gap-2 text-sm">
+                    <input type="checkbox" name="block_on_stockout" value="1" @checked($block_on_stockout)>
+                    {{ __('app.block_on_stockout_enable') }}
+                </label>
+                <button class="min-h-11 rounded-lg border border-line px-4 text-sm">{{ __('app.save') }}</button>
+            </form>
         </div>
     @endif
 
