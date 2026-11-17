@@ -29,6 +29,7 @@ class CreateOrder
     public function __construct(
         private PricingEngine $pricing,
         private ResolveCoupon $resolveCoupon,
+        private UpsertCustomerByPhone $upsertCustomer,
         private FeatureGate $features,
         private Usage $usage,
     ) {}
@@ -172,14 +173,37 @@ class CreateOrder
                 $number = $this->nextNumber($branch->id);
                 $placedAt = now();
 
+                $customerId = null;
+                $customerPhone = $data['customer_phone'] ?? null;
+                $customerName = $data['customer_name'] ?? null;
+
+                if ($customerPhone !== null && $customerPhone !== '') {
+                    $addressLine = is_array($data['delivery_address'] ?? null)
+                        ? ($data['delivery_address']['line'] ?? $data['delivery_address']['address_line'] ?? null)
+                        : null;
+                    $areaName = is_array($data['delivery_address'] ?? null)
+                        ? ($data['delivery_address']['area'] ?? $data['delivery_address']['area_name'] ?? null)
+                        : null;
+
+                    $customer = $this->upsertCustomer->handle(
+                        $customerPhone,
+                        (string) ($customerName ?? ''),
+                        $addressLine,
+                        $areaName,
+                    );
+                    $customerId = $customer->id;
+                    $customerName = $customer->name;
+                }
+
                 $order = Order::query()->create([
                     'branch_id' => $branch->id,
                     'number' => $number,
                     'type' => $data['type'],
                     'source' => $data['source'],
                     'status' => 'placed',
-                    'customer_name' => $data['customer_name'] ?? null,
-                    'customer_phone' => $data['customer_phone'] ?? null,
+                    'customer_id' => $customerId,
+                    'customer_name' => $customerName,
+                    'customer_phone' => $customerPhone,
                     'delivery_zone_id' => $deliveryZoneId,
                     'delivery_address' => $data['delivery_address'] ?? null,
                     'notes' => $data['notes'] ?? null,

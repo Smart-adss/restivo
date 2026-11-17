@@ -8,16 +8,18 @@ use App\Models\Branch;
 use App\Models\Tenant;
 use App\Support\Features\FeatureGate;
 use App\Support\Tenancy\TenantContext;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PublicMenuController extends Controller
 {
-    public function show(string $slug, string $branchPublicId, BuildPublicMenu $buildPublicMenu): View
-    {
-        $menu = $buildPublicMenu->handle($slug, $branchPublicId);
+    public function show(
+        string $slug,
+        string $branchPublicId,
+        PublicOrderPageController $orderPage,
+    ): View {
+        $menu = $orderPage->orderContext($slug, $branchPublicId, app(BuildPublicMenu::class), app(FeatureGate::class));
 
         return view('public.menu.show', $menu);
     }

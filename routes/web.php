@@ -9,7 +9,9 @@ use App\Http\Controllers\Menu\CategoryController;
 use App\Http\Controllers\Menu\ProductController;
 use App\Http\Controllers\Menu\ThemeController;
 use App\Http\Controllers\Platform\AuditController;
+use App\Http\Controllers\OrderBoardController;
 use App\Http\Controllers\PublicMenuController;
+use App\Http\Controllers\PublicOrderPageController;
 use App\Http\Controllers\Platform\BillingController;
 use App\Http\Controllers\Platform\PlanController;
 use App\Http\Controllers\Platform\SettingController;
@@ -86,6 +88,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/pos', [PosController::class, 'show'])->name('app.pos');
         Route::post('/pos', [PosController::class, 'store'])->middleware('subscription.writable')->name('app.pos.store');
 
+        Route::get('/orders', [OrderBoardController::class, 'index'])->name('app.orders.index');
+        Route::get('/orders/poll', [OrderBoardController::class, 'poll'])->name('app.orders.poll');
+        Route::post('/orders/{publicId}/status', [OrderBoardController::class, 'status'])->middleware('subscription.writable')->name('app.orders.status');
+        Route::post('/orders/{publicId}/cancel', [OrderBoardController::class, 'cancel'])->middleware('subscription.writable')->name('app.orders.cancel');
+
         Route::prefix('menu')->name('app.menu.')->group(function () {
             Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
             Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
@@ -116,3 +123,6 @@ Route::get('/{slug}/menu/{branchPublicId}', [PublicMenuController::class, 'show'
 Route::get('/{slug}/menu/{branchPublicId}/qr.png', [PublicMenuController::class, 'qr'])
     ->where('slug', '[a-z0-9-]{3,40}')
     ->name('public.menu.qr');
+Route::get('/{slug}/orders/{orderPublicId}', [PublicOrderPageController::class, 'track'])
+    ->where('slug', '[a-z0-9-]{3,40}')
+    ->name('public.orders.track');

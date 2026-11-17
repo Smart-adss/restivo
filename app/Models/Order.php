@@ -67,6 +67,11 @@ class Order extends Model
         return $this->belongsTo(DeliveryZone::class);
     }
 
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
