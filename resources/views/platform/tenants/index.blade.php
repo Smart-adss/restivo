@@ -18,6 +18,12 @@
                         <span>
                             <span class="block font-semibold">{{ $tenant->displayName() }}</span>
                             <span class="text-sm text-ink/70">{{ $tenant->slug }}</span>
+                            @if ($tenant->subscription)
+                                <span class="mt-1 block text-xs text-ink/60">
+                                    {{ $tenant->subscription->plan?->name() }}
+                                    · {{ $tenant->subscription->current_period_end?->timezone('Africa/Cairo')->toDateString() }}
+                                </span>
+                            @endif
                         </span>
                         <span class="text-sm">{{ $tenant->status === 'active' ? __('app.status_active') : __('app.status_suspended') }}</span>
                     </a>
