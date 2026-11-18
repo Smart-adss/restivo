@@ -1,27 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-semibold tracking-tight">{{ __('app.orders') }}</h1>
-            <p class="mt-1 text-sm text-ink/70">{{ __('app.orders_board_hint') }}</p>
-        </div>
-        <form method="GET" action="{{ route('app.orders.index') }}" class="flex items-end gap-2">
-            <label class="text-sm">{{ __('app.branch') }}
-                <select name="branch_id" class="mt-1 min-h-11 rounded-lg border border-line px-3" onchange="this.form.submit()">
-                    @foreach ($branches as $option)
-                        <option value="{{ $option->id }}" @selected($option->id === $branch->id)>{{ $option->name() }}</option>
-                    @endforeach
-                </select>
-            </label>
-        </form>
-    </div>
+    <x-ui.page-header :title="__('app.orders')" :description="__('app.orders_board_hint')">
+        <x-slot:actions>
+            <form method="GET" action="{{ route('app.orders.index') }}" class="flex items-end gap-2">
+                <div>
+                    <x-ui.label for="orders-branch">{{ __('app.branch') }}</x-ui.label>
+                    <x-ui.select id="orders-branch" name="branch_id" onchange="this.form.submit()">
+                        @foreach ($branches as $option)
+                            <option value="{{ $option->id }}" @selected($option->id === $branch->id)>{{ $option->name() }}</option>
+                        @endforeach
+                    </x-ui.select>
+                </div>
+            </form>
+        </x-slot:actions>
+    </x-ui.page-header>
 
-    @if (session('status'))
-        <p class="mb-4 rounded-lg border border-s-4 border-accent bg-white px-4 py-3 text-sm">{{ session('status') }}</p>
-    @endif
     @error('status')
-        <p class="mb-4 rounded-lg border border-s-4 border-danger bg-white px-4 py-3 text-sm text-danger">{{ $message }}</p>
+        <x-ui.alert variant="danger" class="mb-4">{{ $message }}</x-ui.alert>
     @enderror
 
     <div id="orders-board"

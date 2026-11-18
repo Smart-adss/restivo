@@ -38,7 +38,7 @@ class ProductController extends Controller
         $this->authorizeMenu($features);
 
         return view('app.menu.products.index', [
-            'products' => Product::query()->with('category')->orderBy('name_ar')->get(),
+            'products' => Product::query()->with(['category', 'images'])->orderBy('name_ar')->get(),
         ]);
     }
 
