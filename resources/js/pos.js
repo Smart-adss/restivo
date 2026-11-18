@@ -7,6 +7,7 @@ export function posSale(config) {
         csrf: config.csrf,
         labels: config.labels,
         cart: [],
+        query: '',
         cashAmount: '',
         cardAmount: '',
         pending: false,
@@ -15,24 +16,53 @@ export function posSale(config) {
         receiptUrl: '',
         idempotencyKey: null,
 
+        filteredProducts() {
+            const q = (this.query || '').trim().toLowerCase();
+            if (! q) {
+                return this.products;
+            }
+
+            return this.products.filter((product) => {
+                const ar = (product.name_ar || '').toLowerCase();
+                const en = (product.name_en || '').toLowerCase();
+
+                return ar.includes(q) || en.includes(q);
+            });
+        },
+
         lineLabel(line) {
-            const product = this.products.find((item) => item.id === line.product_id);
-            if (!product) return '';
+            const product = line.product || this.products.find((item) => item.id === line.product_id);
+            if (! product) {
+                return '';
+            }
+
             return this.locale === 'ar' ? product.name_ar : product.name_en;
+        },
+
+        changeQty(index, delta) {
+            const line = this.cart[index];
+            if (! line) {
+                return;
+            }
+
+            const next = Number(line.quantity || 1) + delta;
+            if (next <= 0) {
+                this.cart.splice(index, 1);
+                return;
+            }
+
+            line.quantity = next;
+        },
+
+        removeLine(index) {
+            this.cart.splice(index, 1);
         },
 
         addProduct(product) {
             for (const group of product.option_groups || []) {
-                if (group.is_required && (!group.options || group.options.length === 0)) {
+                if (group.is_required && (! group.options || group.options.length === 0)) {
                     this.error = this.labels.requiredOptions;
                     return;
-                }
-                if (group.is_required) {
-                    const defaults = group.options.filter((option) => option);
-                    if (group.selection === 'single') {
-                        // Require cashier to confirm required groups via prompt-less auto-pick first option.
-                        // If multiple required groups exist, pick first option of each.
-                    }
                 }
             }
 
@@ -40,8 +70,6 @@ export function posSale(config) {
             for (const group of product.option_groups || []) {
                 if (group.is_required && group.options.length > 0) {
                     if (group.options.length > 1 && group.selection === 'single') {
-                        // Keep cart blocked until a single required choice is explicit: use first for speed in MVP grid,
-                        // but validate count against min_select.
                         optionIds.push(group.options[0].id);
                     } else {
                         for (let i = 0; i < Math.max(1, group.min_select || 1); i++) {
@@ -54,7 +82,7 @@ export function posSale(config) {
             }
 
             for (const group of product.option_groups || []) {
-                if (!group.is_required) {
+                if (! group.is_required) {
                     continue;
                 }
                 const selected = optionIds.filter((id) => group.options.some((option) => option.id === id)).length;
@@ -64,7 +92,17 @@ export function posSale(config) {
                 }
             }
 
+            const existing = this.cart.find((line) =>
+                line.product_id === product.id
+                && JSON.stringify(line.option_ids || []) === JSON.stringify(optionIds)
+            );
+
             this.error = '';
+            if (existing) {
+                existing.quantity = Number(existing.quantity || 1) + 1;
+                return;
+            }
+
             this.cart.push({
                 product_id: product.id,
                 quantity: 1,
@@ -83,6 +121,7 @@ export function posSale(config) {
             if (card > 0) {
                 payments.push({ method: 'card', amount: card.toFixed(2) });
             }
+
             return payments;
         },
 
@@ -91,6 +130,7 @@ export function posSale(config) {
             const rand = Array.from(crypto.getRandomValues(new Uint8Array(10)))
                 .map((b) => b.toString(16).padStart(2, '0'))
                 .join('');
+
             return (time + rand).slice(0, 26).toUpperCase();
         },
 
@@ -102,7 +142,7 @@ export function posSale(config) {
             for (const line of this.cart) {
                 const product = line.product || this.products.find((item) => item.id === line.product_id);
                 for (const group of product?.option_groups || []) {
-                    if (!group.is_required) {
+                    if (! group.is_required) {
                         continue;
                     }
                     const selected = (line.option_ids || []).filter((id) => group.options.some((option) => option.id === id)).length;
@@ -113,7 +153,7 @@ export function posSale(config) {
                 }
             }
 
-            if (!this.idempotencyKey) {
+            if (! this.idempotencyKey) {
                 this.idempotencyKey = this.newKey();
             }
 
@@ -146,9 +186,8 @@ export function posSale(config) {
                 this.cardAmount = '';
                 this.idempotencyKey = null;
             } catch (error) {
-                if (!error.response) {
+                if (! error.response) {
                     this.error = this.labels.networkError;
-                    // Keep cart and idempotency key for retry.
                 } else if (error.response.status === 422 && error.response.data?.error?.fields?.total) {
                     this.error = `${error.response.data.message}: ${error.response.data.error.fields.total}`;
                     this.idempotencyKey = null;
