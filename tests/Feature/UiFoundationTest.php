@@ -53,7 +53,7 @@ class UiFoundationTest extends TestCase
             ->get(route('app.home'))
             ->assertOk()
             ->assertSee(__('app.nav_workspace'), false)
-            ->assertSee(__('app.branches_home_hint'), false)
+            ->assertSee(__('app.workspace_home_title'), false)
             ->assertSee('ui-shell-aside', false);
     }
 

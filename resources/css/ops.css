@@ -1,0 +1,79 @@
+/* Operational surface helpers composed with app.css tokens. */
+
+@layer components {
+    .ops-product-tile {
+        display: flex;
+        min-height: 5.5rem;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+        padding: 0.85rem;
+        text-align: start;
+        transition:
+            border-color 140ms var(--ease-out),
+            background-color 140ms var(--ease-out),
+            transform 140ms var(--ease-out);
+    }
+
+    .ops-product-tile:hover {
+        border-color: color-mix(in srgb, var(--color-brand) 40%, var(--color-line));
+        background: color-mix(in srgb, var(--color-canvas) 55%, white);
+    }
+
+    .ops-product-tile:active {
+        transform: scale(0.98);
+    }
+
+    .ops-cart-shell {
+        display: flex;
+        min-height: 28rem;
+        flex-direction: column;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-lg);
+        background: var(--color-surface);
+    }
+
+    .ops-ticket {
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-lg);
+        background: var(--color-surface);
+        padding: 1rem;
+        transition: border-color 160ms var(--ease-out);
+    }
+
+    .ops-ticket-late {
+        border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-line));
+        box-shadow: inset 4px 0 0 var(--color-danger);
+    }
+
+    .ops-ticket-ready {
+        border-color: color-mix(in srgb, var(--color-brand) 40%, var(--color-line));
+        box-shadow: inset 4px 0 0 var(--color-brand);
+    }
+
+    .ops-qty-btn {
+        display: inline-flex;
+        min-height: 2.75rem;
+        min-width: 2.75rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-sm);
+        background: var(--color-canvas);
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ops-product-tile,
+    .ops-ticket {
+        transition: none !important;
+    }
+
+    .ops-product-tile:active {
+        transform: none;
+    }
+}
