@@ -28,7 +28,13 @@
                                 </span>
                             @endif
                         </span>
-                        <span class="shrink-0 text-sm">{{ $tenant->status === 'active' ? __('app.status_active') : __('app.status_suspended') }}</span>
+                        <span @class([
+                            'shrink-0 rounded-md px-2 py-1 text-xs font-semibold',
+                            'bg-canvas text-brand' => $tenant->status === 'active',
+                            'bg-danger/10 text-danger' => $tenant->status !== 'active',
+                        ])>
+                            {{ $tenant->status === 'active' ? __('app.status_active') : __('app.status_suspended') }}
+                        </span>
                     </a>
                 </li>
             @endforeach

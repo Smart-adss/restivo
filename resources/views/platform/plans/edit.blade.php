@@ -1,32 +1,35 @@
 @extends('layouts.app')
 
 @section('content')
-    @php($field = 'w-full rounded-md border border-line bg-white px-3 py-3 text-start outline-none focus:border-brand')
-    <h1 class="text-2xl font-semibold">{{ $plan->name() }}</h1>
-    <p class="mt-1 text-sm text-ink/70">{{ $plan->code }}</p>
-    <form method="POST" action="{{ route('platform.plans.update', $plan->code) }}" class="mt-6 max-w-xl space-y-4">
+    <x-ui.page-header :title="$plan->name()" :description="$plan->code">
+        <x-slot:actions>
+            <x-ui.button :href="route('platform.plans.index')" variant="ghost">{{ __('app.plans') }}</x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    <form method="POST" action="{{ route('platform.plans.update', $plan->code) }}" class="ui-panel max-w-xl space-y-4 px-4 py-5">
         @csrf
         @method('PUT')
         <div>
-            <label class="mb-1 block text-sm" for="name_ar">{{ __('app.name_ar') }}</label>
-            <input id="name_ar" name="name_ar" value="{{ old('name_ar', $plan->name_ar) }}" class="{{ $field }}">
+            <x-ui.label for="name_ar">{{ __('app.name_ar') }}</x-ui.label>
+            <x-ui.field id="name_ar" name="name_ar" value="{{ old('name_ar', $plan->name_ar) }}" />
         </div>
         <div>
-            <label class="mb-1 block text-sm" for="name_en">{{ __('app.name_en') }}</label>
-            <input id="name_en" name="name_en" value="{{ old('name_en', $plan->name_en) }}" class="{{ $field }}">
+            <x-ui.label for="name_en">{{ __('app.name_en') }}</x-ui.label>
+            <x-ui.field id="name_en" name="name_en" value="{{ old('name_en', $plan->name_en) }}" />
         </div>
         <div>
-            <label class="mb-1 block text-sm" for="description">{{ __('app.description') }}</label>
-            <textarea id="description" name="description" class="{{ $field }}">{{ old('description', $plan->description) }}</textarea>
+            <x-ui.label for="description">{{ __('app.description') }}</x-ui.label>
+            <x-ui.textarea id="description" name="description">{{ old('description', $plan->description) }}</x-ui.textarea>
         </div>
         <div class="grid gap-4 md:grid-cols-2">
             <div>
-                <label class="mb-1 block text-sm" for="monthly_amount">{{ __('app.monthly') }}</label>
-                <input id="monthly_amount" name="monthly_amount" value="{{ old('monthly_amount', $plan->priceFor('monthly')) }}" class="{{ $field }}">
+                <x-ui.label for="monthly_amount">{{ __('app.monthly') }}</x-ui.label>
+                <x-ui.field id="monthly_amount" name="monthly_amount" value="{{ old('monthly_amount', $plan->priceFor('monthly')) }}" class="tabular-nums" />
             </div>
             <div>
-                <label class="mb-1 block text-sm" for="yearly_amount">{{ __('app.yearly') }}</label>
-                <input id="yearly_amount" name="yearly_amount" value="{{ old('yearly_amount', $plan->priceFor('yearly')) }}" class="{{ $field }}">
+                <x-ui.label for="yearly_amount">{{ __('app.yearly') }}</x-ui.label>
+                <x-ui.field id="yearly_amount" name="yearly_amount" value="{{ old('yearly_amount', $plan->priceFor('yearly')) }}" class="tabular-nums" />
             </div>
         </div>
         <input type="hidden" name="is_active" value="{{ $plan->is_active ? 1 : 0 }}">
@@ -35,10 +38,10 @@
         @foreach ($catalog as $key => $definition)
             @php($current = $plan->features->firstWhere('key', $key)?->pivot->value)
             <div>
-                <label class="mb-1 block text-sm" for="feature-{{ $key }}">{{ $definition['name_ar'] }} <span class="text-ink/50">{{ $key }}</span></label>
-                <input id="feature-{{ $key }}" name="features[{{ $key }}]" value="{{ old('features.'.$key, $current) }}" class="{{ $field }}">
+                <x-ui.label for="feature-{{ $key }}">{{ $definition['name_ar'] }} <span class="text-ink/50">{{ $key }}</span></x-ui.label>
+                <x-ui.field id="feature-{{ $key }}" name="features[{{ $key }}]" value="{{ old('features.'.$key, $current) }}" />
             </div>
         @endforeach
-        <button class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
+        <x-ui.button type="submit" variant="primary">{{ __('app.save') }}</x-ui.button>
     </form>
 @endsection

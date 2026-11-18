@@ -104,14 +104,14 @@ class BuildPublicMenu
 
         $byCategory = $products->groupBy('category_id');
 
-        $payload = $categories->map(function (MenuCategory $category) use ($byCategory, $branch): ?array {
+        $payload = $categories->map(function (MenuCategory $category) use ($byCategory, $branch, $tenant): ?array {
             $items = ($byCategory->get($category->id) ?? collect())
-                ->map(fn (Product $product) => $this->productPayload($product, $branch))
+                ->map(fn (Product $product) => $this->productPayload($product, $branch, $tenant))
                 ->values();
 
-            $children = $category->children->map(function (MenuCategory $child) use ($byCategory, $branch): ?array {
+            $children = $category->children->map(function (MenuCategory $child) use ($byCategory, $branch, $tenant): ?array {
                 $childItems = ($byCategory->get($child->id) ?? collect())
-                    ->map(fn (Product $product) => $this->productPayload($product, $branch))
+                    ->map(fn (Product $product) => $this->productPayload($product, $branch, $tenant))
                     ->values();
 
                 if ($childItems->isEmpty()) {
@@ -152,8 +152,10 @@ class BuildPublicMenu
     /**
      * @return array<string, mixed>
      */
-    private function productPayload(Product $product, Branch $branch): array
+    private function productPayload(Product $product, Branch $branch, Tenant $tenant): array
     {
+        $hasImage = $product->images->first()?->path !== null;
+
         return [
             'public_id' => $product->public_id,
             'name_ar' => $product->name_ar,
@@ -162,6 +164,12 @@ class BuildPublicMenu
             'description_en' => $product->description_en,
             'price' => $product->priceAt($branch),
             'image_path' => $product->images->first()?->path,
+            'image_url' => $hasImage
+                ? route('public.menu.product-image', [
+                    'slug' => $tenant->slug,
+                    'productPublicId' => $product->public_id,
+                ])
+                : null,
         ];
     }
 }

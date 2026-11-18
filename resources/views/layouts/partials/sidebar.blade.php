@@ -5,7 +5,12 @@
 <aside class="ui-shell-aside text-white md:sticky md:top-0 md:flex md:h-dvh md:min-h-screen md:w-[15.5rem] md:shrink-0 md:flex-col">
     <div class="flex items-center justify-between gap-3 px-4 py-5 md:block">
         <a href="{{ auth()->user()->is_platform_user ? route('platform.tenants.index') : route('app.home') }}" class="block min-w-0">
-            <span class="block text-2xl font-semibold tracking-tight">{{ config('app.name') }}</span>
+            <span class="flex items-center gap-2">
+                <span class="block text-2xl font-semibold tracking-tight">{{ config('app.name') }}</span>
+                @if (auth()->user()->is_platform_user)
+                    <span class="platform-mark">{{ __('app.platform_badge') }}</span>
+                @endif
+            </span>
             <span class="mt-1 block truncate text-sm text-white/55">
                 {{ auth()->user()->tenant?->displayName() ?? __('app.platform_title') }}
             </span>

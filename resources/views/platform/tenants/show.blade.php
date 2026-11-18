@@ -1,19 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-semibold">{{ $tenant->displayName() }}</h1>
-            <p class="mt-1 text-sm text-ink/70">{{ $tenant->slug }}</p>
-        </div>
-        <p class="text-sm">{{ $tenant->status === 'active' ? __('app.status_active') : __('app.status_suspended') }}</p>
-    </div>
+    <x-ui.page-header :title="$tenant->displayName()" :description="$tenant->slug">
+        <x-slot:actions>
+            <span class="text-sm font-semibold">{{ $tenant->status === 'active' ? __('app.status_active') : __('app.status_suspended') }}</span>
+            <x-ui.button :href="route('platform.tenants.index')" variant="ghost">{{ __('app.tenants') }}</x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     @if (auth()->user()->hasPermission('platform.tenants.manage') && $owner)
-        @php($field = 'w-full rounded-md border border-line bg-white px-3 py-3 text-start outline-none focus:border-brand')
-        <section class="mt-6 max-w-xl rounded-lg border border-line bg-white px-4 py-4">
-            <h2 class="font-semibold">{{ __('app.tenant_profile') }}</h2>
-            <p class="mt-1 text-sm text-ink/70">{{ $tenant->slug }}</p>
+        <section class="ui-panel max-w-xl px-4 py-5">
+            <x-ui.section-title :title="__('app.tenant_profile')" :description="$tenant->slug" />
             <form method="POST" action="{{ route('platform.tenants.profile.update', $tenant->public_id) }}" class="mt-4 space-y-3">
                 @csrf
                 @foreach ([
@@ -26,96 +23,95 @@
                     'owner_email' => $owner->email,
                 ] as $name => $value)
                     <div>
-                        <label for="{{ $name }}" class="mb-1 block text-sm">{{ __('app.'.$name) }}</label>
-                        <input id="{{ $name }}" name="{{ $name }}" type="{{ str_contains($name, 'email') ? 'email' : 'text' }}" value="{{ old($name, $value) }}" required class="{{ $field }}">
+                        <x-ui.label for="{{ $name }}">{{ __('app.'.$name) }}</x-ui.label>
+                        <x-ui.field id="{{ $name }}" name="{{ $name }}" type="{{ str_contains($name, 'email') ? 'email' : 'text' }}" value="{{ old($name, $value) }}" required />
                         @error($name)
                             <p class="mt-1 text-sm text-danger">{{ $message }}</p>
                         @enderror
                     </div>
                 @endforeach
-                <button type="submit" class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-brand-ink hover:bg-ink">{{ __('app.save') }}</button>
+                <x-ui.button type="submit" variant="primary">{{ __('app.save') }}</x-ui.button>
             </form>
         </section>
 
-        <section class="mt-6 max-w-xl rounded-lg border border-line bg-white px-4 py-4">
-            <h2 class="font-semibold">{{ __('app.owner_password') }}</h2>
-            <p class="mt-1 text-sm text-ink/70">{{ $owner->email }} — {{ __('app.owner_password_hint') }}</p>
+        <section class="ui-panel mt-6 max-w-xl px-4 py-5">
+            <x-ui.section-title :title="__('app.owner_password')" :description="$owner->email.' — '.__('app.owner_password_hint')" />
             <form method="POST" action="{{ route('platform.tenants.owner-password.update', $tenant->public_id) }}" class="mt-4 space-y-3">
                 @csrf
                 <div>
-                    <label for="password" class="mb-1 block text-sm">{{ __('app.password') }}</label>
-                    <input id="password" name="password" type="password" required autocomplete="new-password" class="w-full rounded-md border border-line bg-white px-3 py-3">
+                    <x-ui.label for="password">{{ __('app.password') }}</x-ui.label>
+                    <x-ui.field id="password" name="password" type="password" required autocomplete="new-password" />
                     @error('password')
                         <p class="mt-1 text-sm text-danger">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
-                    <label for="password_confirmation" class="mb-1 block text-sm">{{ __('app.password_confirmation') }}</label>
-                    <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" class="w-full rounded-md border border-line bg-white px-3 py-3">
+                    <x-ui.label for="password_confirmation">{{ __('app.password_confirmation') }}</x-ui.label>
+                    <x-ui.field id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" />
                 </div>
-                <button type="submit" class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 text-sm font-semibold text-brand-ink hover:bg-ink">{{ __('app.save') }}</button>
+                <x-ui.button type="submit" variant="primary">{{ __('app.save') }}</x-ui.button>
             </form>
         </section>
     @endif
 
     @if (session('temporary_password'))
-        <div class="mt-6 max-w-xl rounded-lg border border-accent bg-white px-4 py-4">
-            <p class="text-sm font-semibold">{{ __('app.temporary_password') }}</p>
-            <p class="mt-2 font-mono text-lg">{{ session('temporary_password') }}</p>
-            <p class="mt-2 text-sm text-ink/70">{{ session('owner_email') }} — {{ __('app.temporary_password_hint') }}</p>
-        </div>
+        <x-ui.alert variant="warning" class="mt-6 max-w-xl">
+            <span class="block font-semibold">{{ __('app.temporary_password') }}</span>
+            <span class="mt-2 block font-mono text-lg" dir="ltr">{{ session('temporary_password') }}</span>
+            <span class="mt-2 block text-sm">{{ session('owner_email') }} — {{ __('app.temporary_password_hint') }}</span>
+        </x-ui.alert>
     @endif
 
     @if ($subscription)
-        <section class="mt-6 max-w-xl rounded-lg border border-line bg-white px-4 py-4 text-sm">
+        <section class="ui-panel mt-6 max-w-xl px-4 py-5 text-sm">
             <p class="font-semibold">{{ $subscription->plan->name() }}</p>
             <p class="mt-1">{{ __('app.subscription_status_'.$subscription->status) }}</p>
-            <p class="mt-1 text-ink/70">{{ $subscription->current_period_end->timezone('Africa/Cairo')->toDateString() }}</p>
+            <p class="mt-1 tabular-nums text-ink/70">{{ $subscription->current_period_end->timezone('Africa/Cairo')->toDateString() }}</p>
             <dl class="mt-4 space-y-2 border-t border-line pt-3">
                 <div class="flex justify-between gap-4">
                     <dt>{{ __('app.branches') }}</dt>
-                    <dd>{{ $usage['branch_count'] }} / {{ $usage['branch_limit'] ?? __('app.unlimited') }}</dd>
+                    <dd class="tabular-nums">{{ $usage['branch_count'] }} / {{ $usage['branch_limit'] ?? __('app.unlimited') }}</dd>
                 </div>
                 <div class="flex justify-between gap-4">
                     <dt>{{ __('app.staff') }}</dt>
-                    <dd>{{ $usage['user_count'] }} / {{ $usage['user_limit'] ?? __('app.unlimited') }}</dd>
+                    <dd class="tabular-nums">{{ $usage['user_count'] }} / {{ $usage['user_limit'] ?? __('app.unlimited') }}</dd>
                 </div>
                 <div class="flex justify-between gap-4">
                     <dt>{{ __('app.orders') }}</dt>
-                    <dd>{{ $usage['order_count'] }} / {{ $usage['order_limit'] ?? __('app.unlimited') }}</dd>
+                    <dd class="tabular-nums">{{ $usage['order_count'] }} / {{ $usage['order_limit'] ?? __('app.unlimited') }}</dd>
                 </div>
             </dl>
             @foreach ($subscription->invoices as $invoice)
-                <p class="mt-2">{{ $invoice->status }} — {{ $invoice->total }} {{ $invoice->currency_code }}</p>
+                <p class="mt-2">{{ $invoice->status }} — <span class="tabular-nums">{{ $invoice->total }} {{ $invoice->currency_code }}</span></p>
             @endforeach
         </section>
         @if (auth()->user()->hasPermission('platform.billing.record_payment'))
             <form method="POST" action="{{ route('platform.tenants.payments.store', $tenant->public_id) }}" class="mt-4 max-w-xl space-y-3">
                 @csrf
-                <select name="invoice_id" class="w-full rounded-md border border-line bg-white px-3 py-3">
+                <x-ui.select name="invoice_id">
                     @foreach ($subscription->invoices->where('status', 'open') as $invoice)
                         <option value="{{ $invoice->id }}">{{ $invoice->total }} — {{ $invoice->public_id }}</option>
                     @endforeach
-                </select>
-                <input name="provider_ref" placeholder="{{ __('app.provider_ref') }}" class="w-full rounded-md border border-line bg-white px-3 py-3">
+                </x-ui.select>
+                <x-ui.field name="provider_ref" placeholder="{{ __('app.provider_ref') }}" />
                 @error('provider_ref')<p class="text-sm text-danger">{{ $message }}</p>@enderror
-                <button class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 text-sm font-semibold text-brand-ink">{{ __('app.record_payment') }}</button>
+                <x-ui.button type="submit" variant="primary">{{ __('app.record_payment') }}</x-ui.button>
             </form>
         @endif
         @if (auth()->user()->hasPermission('platform.plans.manage'))
             <form method="POST" action="{{ route('platform.tenants.plan.update', $tenant->public_id) }}" class="mt-4 flex max-w-xl gap-2">
                 @csrf
-                <select name="plan_code" class="w-full rounded-md border border-line bg-white px-3 py-3">
+                <x-ui.select name="plan_code">
                     @foreach ($plans as $plan)
                         <option value="{{ $plan->code }}" @selected($subscription->plan->code === $plan->code)>{{ $plan->name() }}</option>
                     @endforeach
-                </select>
-                <button class="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 text-sm">{{ __('app.change_plan') }}</button>
+                </x-ui.select>
+                <x-ui.button type="submit" variant="secondary">{{ __('app.change_plan') }}</x-ui.button>
             </form>
             @error('plan_code')<p class="mt-2 text-sm text-danger">{{ $message }}</p>@enderror
 
-            <section class="mt-6 max-w-xl rounded-lg border border-line bg-white px-4 py-4 text-sm">
-                <h2 class="font-semibold">{{ __('app.subscription_addons') }}</h2>
+            <section class="ui-panel mt-6 max-w-xl px-4 py-5 text-sm">
+                <x-ui.section-title :title="__('app.subscription_addons')" />
                 <p class="mt-1 text-ink/70">
                     {{ __('app.effective_branch_limit') }}: {{ $effectiveBranchLimit ?? __('app.unlimited') }}
                     · {{ __('app.effective_user_limit') }}: {{ $effectiveUserLimit ?? __('app.unlimited') }}
@@ -125,10 +121,10 @@
                         @csrf
                         <input type="hidden" name="addon_key" value="{{ $addon->key }}">
                         <div class="min-w-[10rem] flex-1">
-                            <label class="mb-1 block text-xs text-ink/70">{{ $addon->name() }}</label>
-                            <input type="number" name="quantity" min="0" max="100" value="{{ $addonQuantities[$addon->key] ?? 0 }}" class="w-full rounded-md border border-line bg-white px-3 py-2">
+                            <x-ui.label>{{ $addon->name() }}</x-ui.label>
+                            <x-ui.field type="number" name="quantity" min="0" max="100" value="{{ $addonQuantities[$addon->key] ?? 0 }}" class="tabular-nums" />
                         </div>
-                        <button class="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 text-sm">{{ __('app.save') }}</button>
+                        <x-ui.button type="submit" variant="secondary">{{ __('app.save') }}</x-ui.button>
                     </form>
                 @endforeach
                 @error('quantity')<p class="mt-2 text-sm text-danger">{{ $message }}</p>@enderror
@@ -140,9 +136,9 @@
     @if (auth()->user()->hasPermission('platform.tenants.manage'))
         <form method="POST" action="{{ route($tenant->status === 'active' ? 'platform.tenants.suspend' : 'platform.tenants.activate', $tenant->public_id) }}" class="mt-6">
             @csrf
-            <button type="submit" class="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-4 text-sm">
+            <x-ui.button type="submit" :variant="$tenant->status === 'active' ? 'danger' : 'primary'">
                 {{ $tenant->status === 'active' ? __('app.suspend') : __('app.activate') }}
-            </button>
+            </x-ui.button>
         </form>
     @endif
 @endsection

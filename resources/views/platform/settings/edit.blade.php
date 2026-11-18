@@ -1,24 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-    @php($field = 'w-full rounded-md border border-line bg-white px-3 py-3 text-start outline-none focus:border-brand')
-    <h1 class="text-2xl font-semibold">{{ __('app.settings') }}</h1>
-    <form method="POST" action="{{ route('platform.settings.update') }}" class="mt-6 max-w-xl space-y-4">
+    <x-ui.page-header :title="__('app.settings')" :description="__('app.platform_settings_hint')" />
+
+    <form method="POST" action="{{ route('platform.settings.update') }}" class="ui-panel max-w-xl space-y-4 px-4 py-5">
         @csrf
         @method('PUT')
         <div>
-            <label class="mb-1 block text-sm" for="platform_name">{{ __('app.platform_name') }}</label>
-            <input id="platform_name" name="platform_name" value="{{ old('platform_name', $platformName) }}" class="{{ $field }}">
+            <x-ui.label for="platform_name">{{ __('app.platform_name') }}</x-ui.label>
+            <x-ui.field id="platform_name" name="platform_name" value="{{ old('platform_name', $platformName) }}" />
         </div>
         <div>
-            <label class="mb-1 block text-sm" for="billing_grace_days">{{ __('app.grace_days') }}</label>
-            <input id="billing_grace_days" name="billing_grace_days" value="{{ old('billing_grace_days', $graceDays) }}" class="{{ $field }}">
+            <x-ui.label for="billing_grace_days">{{ __('app.grace_days') }}</x-ui.label>
+            <x-ui.field id="billing_grace_days" name="billing_grace_days" value="{{ old('billing_grace_days', $graceDays) }}" class="tabular-nums" />
         </div>
         <div>
-            <label class="mb-1 block text-sm" for="kitchen_poll_seconds">{{ __('app.poll_seconds') }}</label>
-            <input id="kitchen_poll_seconds" name="kitchen_poll_seconds" value="{{ old('kitchen_poll_seconds', $pollSeconds) }}" class="{{ $field }}">
+            <x-ui.label for="kitchen_poll_seconds">{{ __('app.poll_seconds') }}</x-ui.label>
+            <x-ui.field id="kitchen_poll_seconds" name="kitchen_poll_seconds" value="{{ old('kitchen_poll_seconds', $pollSeconds) }}" class="tabular-nums" />
         </div>
         <input type="hidden" name="maintenance_enabled" value="{{ $maintenance ? 1 : 0 }}">
-        <button class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
+        <x-ui.button type="submit" variant="primary">{{ __('app.save') }}</x-ui.button>
     </form>
 @endsection
