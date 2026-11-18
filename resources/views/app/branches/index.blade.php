@@ -1,22 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex items-center justify-between gap-4">
-        <h1 class="text-2xl font-semibold">{{ __('app.branches') }}</h1>
-        @if (auth()->user()->hasPermission('tenant.branches.manage'))
-            <a href="{{ route('app.branches.create') }}" class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 text-sm font-semibold text-brand-ink">{{ __('app.create_branch') }}</a>
-        @endif
-    </div>
-    <ul class="mt-6 grid gap-3 md:grid-cols-2">
-        @forelse ($branches as $branch)
-            <li>
-                <a href="{{ route('app.branches.show', $branch->public_id) }}" class="block rounded-lg border border-line bg-white px-4 py-4">
-                    <p class="font-semibold">{{ $branch->name() }}</p>
-                    <p class="mt-1 text-sm text-ink/70">{{ $branch->city }}</p>
-                </a>
-            </li>
-        @empty
-            <li class="text-sm text-ink/70">{{ __('app.empty_title') }}</li>
-        @endforelse
-    </ul>
+    <x-ui.page-header :title="__('app.branches')">
+        <x-slot:actions>
+            @if (auth()->user()->hasPermission('tenant.branches.manage'))
+                <x-ui.button :href="route('app.branches.create')" variant="primary">{{ __('app.create_branch') }}</x-ui.button>
+            @endif
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    @if ($branches->isEmpty())
+        <x-ui.empty-state :title="__('app.empty_title')" :body="__('app.empty_body')" />
+    @else
+        <ul class="grid gap-3 md:grid-cols-2">
+            @foreach ($branches as $branch)
+                <li>
+                    <a href="{{ route('app.branches.show', $branch->public_id) }}" class="ui-panel block px-4 py-4 transition hover:border-brand">
+                        <p class="font-semibold">{{ $branch->name() }}</p>
+                        <p class="mt-1 text-sm text-ink/70">{{ $branch->city }}</p>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    @endif
 @endsection

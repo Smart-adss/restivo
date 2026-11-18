@@ -1,23 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex items-center justify-between gap-4">
-        <h1 class="text-2xl font-semibold">{{ __('app.staff') }}</h1>
-        <a href="{{ route('app.staff.create') }}" class="inline-flex min-h-11 items-center rounded-lg bg-brand hover:bg-ink px-4 text-sm font-semibold text-brand-ink">{{ __('app.create_staff') }}</a>
+    <x-ui.page-header :title="__('app.staff')">
+        <x-slot:actions>
+            <x-ui.button :href="route('app.staff.create')" variant="primary">{{ __('app.create_staff') }}</x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    <div class="ui-panel overflow-hidden">
+        <ul>
+            @forelse ($staff as $member)
+                <li class="flex items-center justify-between gap-4 border-b border-line px-4 py-3 last:border-b-0">
+                    <div>
+                        <p class="font-semibold">{{ $member->name }}</p>
+                        <p class="text-sm text-ink/70">{{ $member->email }}</p>
+                    </div>
+                    <p class="text-sm text-ink/70">
+                        @foreach ($roleNames->get($member->id, []) as $role)
+                            {{ app()->getLocale() === 'ar' ? $role->name_ar : $role->name_en }}
+                        @endforeach
+                    </p>
+                </li>
+            @empty
+                <li class="px-4 py-6 text-sm text-ink/70">{{ __('app.empty_title') }}</li>
+            @endforelse
+        </ul>
     </div>
-    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-white">
-        @foreach ($staff as $member)
-            <li class="flex items-center justify-between gap-4 px-4 py-3">
-                <div>
-                    <p class="font-semibold">{{ $member->name }}</p>
-                    <p class="text-sm text-ink/70">{{ $member->email }}</p>
-                </div>
-                <p class="text-sm">
-                    @foreach ($roleNames->get($member->id, []) as $role)
-                        {{ app()->getLocale() === 'ar' ? $role->name_ar : $role->name_en }}
-                    @endforeach
-                </p>
-            </li>
-        @endforeach
-    </ul>
 @endsection

@@ -1,12 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-    @php($field = 'w-full rounded-md border border-line bg-white px-3 py-3 text-start outline-none focus:border-brand')
-    <h1 class="text-2xl font-semibold">{{ __('app.edit_category') }}</h1>
-    <form method="POST" action="{{ route('app.menu.categories.update', $category->public_id) }}" class="mt-6 max-w-xl space-y-4">
-        @csrf
-        @method('PUT')
-        @include('app.menu.categories._form', ['category' => $category, 'parents' => $parents, 'field' => $field])
-        <button type="submit" class="flex min-h-11 items-center justify-center rounded-lg bg-brand hover:bg-ink px-4 font-semibold text-brand-ink">{{ __('app.save') }}</button>
-    </form>
+    <x-ui.page-header :title="__('app.edit_category')">
+        <x-slot:actions>
+            <x-ui.button :href="route('app.menu.categories.index')" variant="ghost">{{ __('app.categories') }}</x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    <x-ui.panel class="max-w-xl px-4 py-5">
+        <form method="POST" action="{{ route('app.menu.categories.update', $category->public_id) }}" class="space-y-4">
+            @csrf
+            @method('PUT')
+            @include('app.menu.categories._form', ['category' => $category, 'parents' => $parents])
+            <x-ui.button type="submit" variant="primary">{{ __('app.save') }}</x-ui.button>
+        </form>
+    </x-ui.panel>
 @endsection
