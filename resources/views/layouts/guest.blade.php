@@ -11,7 +11,13 @@
                     radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--color-brand) 45%, transparent), transparent 46%);"></div>
                 <div class="relative">
                     <p class="text-4xl font-semibold tracking-tight">{{ config('app.name') }}</p>
-                    <p class="mt-4 max-w-sm text-lg text-white/75">{{ __('app.login_lead') }}</p>
+                    <p class="mt-4 max-w-sm text-lg text-white/75">
+                        @hasSection('guest-lead')
+                            @yield('guest-lead')
+                        @else
+                            {{ __('app.login_lead') }}
+                        @endif
+                    </p>
                 </div>
                 <p class="relative text-sm text-white/45">{{ __('app.shell_title') }}</p>
             </section>

@@ -220,6 +220,9 @@ Route::get('/{slug}/menu/{branchPublicId}', [PublicMenuController::class, 'show'
 Route::get('/{slug}/menu/{branchPublicId}/qr.png', [PublicMenuController::class, 'qr'])
     ->where('slug', '[a-z0-9-]{3,40}')
     ->name('public.menu.qr');
+Route::get('/{slug}/menu/products/{productPublicId}/image.jpg', [PublicMenuController::class, 'productImage'])
+    ->where('slug', '[a-z0-9-]{3,40}')
+    ->name('public.menu.product-image');
 Route::get('/{slug}/table/{tablePublicId}', [PublicTablePageController::class, 'show'])
     ->where('slug', '[a-z0-9-]{3,40}')
     ->name('public.table.show');
